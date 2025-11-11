@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScaleX Dashboard</title>
+
+    <!-- Tailwind -->
+    <link href="./static/css/tailwind.css" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lucide screenshot of the dashboard -->
+    <script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
+    <!-- Lucide screenshot into a PDF -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="./static/css/styles.css">
+
+
+    <!-- Prevent flash -->
+    <script>
+        window.onload = () => {
+            document.body.style.visibility = 'visible';
+            if (window.lucide) window.lucide.createIcons();
+        };
+    </script>
+</head>
+
+<body style="visibility:hidden">
+
+    <!-- FIXED HEADER (background capped via inner container) -->
+    <!-- <header id="main-header" class="fixed top-0 inset-x-0 z-40 bg-gradient-to-r from-emerald-900 via-gray-900 to-gray-950 shadow-lg"> -->
+    <header id="main-header">
+        <div class="header-inner">
+            <!-- Left: Brand -->
+            <div class="flex items-center space-x-3">
+                <img src="./static/scaletrix-logo.png" alt="Scaletrix.ai Logo" class="logo-img">
+            </div>
+
+            <!-- Right: app_id + logout -->
+            <div class="flex items-center space-x-3">
+                <!-- Export dropdown -->
+                <div class="export-wrapper">
+                    <button id="export-toggle" class="export-button rounded-lg">
+                        export
+                    </button>
+                    <div id="export-menu" class="export-menu hidden">
+                        <button class="export-option" data-format="pdf">Export as PDF</button>
+                        <button class="export-option" data-format="png">Export as Image</button>
+                    </div>
+                </div>
+
+                <span id="client-id-display" class="client-id-text">
+                    <strong style="font-size: 0.9rem;">{{client_id}}</strong>
+                </span>
+
+                <button class="logout-button" onclick="location.href='/login'">
+                    <i data-lucide="power" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN LAYOUT (centered, max width) -->
+    <div class="layout-container">
+        <!-- SIDEBAR (full-height column) -->
+        <aside class="sidebar">
+            <nav>
+                <ul class="space-y-3 pt-4">
+                    <li class="sidebar-link active">
+                        Performance Overview
+                    </li>
+                    <li class="sidebar-link">
+                        Channel &amp; Campaign Analytics
+                    </li>
+                    <li class="sidebar-link">
+                        Attribution &amp; Signal Health
+                    </li>
+                    <li class="sidebar-link">
+                        Funnel &amp; Lead Journey
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- CONTENT -->
+        <main id="main-content" class="main-content">
+            <!-- Heading (syncs with sidebar selection) -->
+            <h2 id="main-heading" class="text-2xl font-bold mb-4">
+                Performance Overview
+            </h2>
+
+            <!-- Grouping & Filtering (hidden for now) -->
+            <div id="filter-section" class=" mt-4 rounded-lg">
+                <div id="filter-header" class="flex justify-between items-center px-4 py-3 cursor-pointer"
+                    onclick="toggleFilterSection()">
+                    <h3 class="text-sm font-semibold text-white">Grouping and Filtering</h3>
+                    <i id="filter-toggle-arrow" data-lucide="chevron-down"
+                        class="w-4 h-4 text-white transition-transform duration-200"></i>
+                </div>
+
+                <div id="filter-content" class="hidden p-4">
+                    <div id="filters-container" class="flex flex-wrap gap-4"></div>
+                    <div id="filter-button" class="mt-4">
+                        <button onclick="window.handleFilterSubmit && handleFilterSubmit()"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg cursor-pointer">
+                            Apply filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI CARDS (placeholder) -->
+            <div id="kpi-cards" class="kpi-grid mt-4">
+
+                <!-- Revenue -->
+                <div class="kpi-card kpi-revenue">
+                    <div class="kpi-card-header">
+                        <span class="kpi-label">Revenue</span>
+                        <span id="rev-change" class="kpi-change">--</span>
+                    </div>
+                    <div class="kpi-main">
+                        <div class="kpi-value-wrap">
+                            <div id="rev-current" class="kpi-value">--</div>
+                            <div id="rev-prev" class="kpi-prev">Prev: --</div>
+                        </div>
+                        <div class="kpi-chart-wrap">
+                            <canvas id="rev-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spend -->
+                <div class="kpi-card kpi-spend">
+                    <div class="kpi-card-header">
+                        <span class="kpi-label">Spend</span>
+                        <span id="spend-change" class="kpi-change">--</span>
+                    </div>
+                    <div class="kpi-main">
+                        <div class="kpi-value-wrap">
+                            <div id="spend-current" class="kpi-value">--</div>
+                            <div id="spend-prev" class="kpi-prev">Prev: --</div>
+                        </div>
+                        <div class="kpi-chart-wrap">
+                            <canvas id="spend-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROAS -->
+                <div class="kpi-card kpi-roas">
+                    <div class="kpi-card-header">
+                        <span class="kpi-label">ROAS</span>
+                        <span id="roas-change" class="kpi-change">--</span>
+                    </div>
+                    <div class="kpi-main">
+                        <div class="kpi-value-wrap">
+                            <div id="roas-current" class="kpi-value">--</div>
+                            <div id="roas-prev" class="kpi-prev">Prev: --</div>
+                        </div>
+                        <div class="kpi-chart-wrap">
+                            <canvas id="roas-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROI -->
+                <div class="kpi-card kpi-roi">
+                    <div class="kpi-card-header">
+                        <span class="kpi-label">ROI</span>
+                        <span id="roi-change" class="kpi-change">--</span>
+                    </div>
+                    <div class="kpi-main">
+                        <div class="kpi-value-wrap">
+                            <div id="roi-current" class="kpi-value">--</div>
+                            <div id="roi-prev" class="kpi-prev">Prev: --</div>
+                        </div>
+                        <div class="kpi-chart-wrap">
+                            <canvas id="roi-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- DETAIL BLOCK -->
+            <div id="detail-section" class="mt-4 rounded-lg shadow-lg p-6 box-shadow-cust">
+                <h3 class="text-xl font-semibold mb-4">Detailed View</h3>
+                <p class="text-gray-300 mb-4 text-sm">
+                    Note: These container represent the main KPI overview. <br>
+                    This will be displayed metrics like: Spend → Revenue → ROI → ROAS | CAC | Pipeline | LTV:CAC |
+                    Attribution Accuracy | Top Channels by ROAS
+                </p>
+                <div id="detail-charts" class="grid gap-4">
+                    <!-- JS: insert canvases / SVGs / tables here -->
+                </div>
+            </div>
+
+            <!-- SMART ALERTS -->
+            <div id="smart-alerts" class="mt-4 bg-gray-900/80 rounded-lg shadow-lg p-6 box-shadow-cust">
+                <h3 class="text-xl font-semibold mb-4">Smart Alerts</h3>
+                <p class="text-gray-300 mb-4 text-sm">
+                    Note: This section will be shown a Smart Insights and Alerts panel (Smart Alerts, ROAS <strong
+                        style="color: rgb(214, 160, 10);" class="font-bold text-lg">↑</strong>18% MoM, Event Recovery
+                    <strong style="color: red;" class="font-bold text-lg">↓</strong>12%, etc.).
+                </p>
+                <!-- JS will append alert rows / badges here -->
+                <!-- Example structure (for later):
+                <div class="flex justify-between items-center">
+                    <span>ROAS dropped below target on Meta Prospecting</span>
+                    <span class="text-red-400 text-sm font-semibold">High</span>
+                </div> -->
+            </div>
+        </main>
+    </div>
+    <footer id="main-footer">
+        <div class="footer-inner">
+            <p>© 2025 <strong>Scaletrix.ai</strong>. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Loader -->
+    <div id="loader" class="hidden fixed inset-0 bg-gray-950 bg-opacity-70 flex items-center justify-center z-50">
+        <div class="animate-spin h-16 w-16 border-4 border-t-emerald-500 border-gray-300 rounded-full"></div>
+    </div>
+
+    <!-- Layout JS -->
+    <script src="./static/js/dashboard_layout.js"></script>
+</body>
+
+</html>
