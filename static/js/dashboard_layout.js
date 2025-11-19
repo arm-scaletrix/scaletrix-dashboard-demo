@@ -267,30 +267,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // --- KPI card testing with sample data ---
-    // ---- Sample monthly data (assumed) ----
-    // We compare current month to previous month up to "today's" day-of-month.
-    // In real use, replace these with values from your FastAPI API.
+    // We treat KPIs as: current month = October, previous month = September.
+    // Below we generate daily series so that:
+    // - Oct revenue & spend are higher than Sep
+    // - ROAS and ROI are slightly better in Oct
+    // - Trends are consistent with the 6-month charts (CAC down, ROAS up)
 
+    const DAYS_IN_MONTH = 30;
+    const dayIndexes = Array.from({ length: DAYS_IN_MONTH }, (_, i) => i); // 0..29
+
+    // Daily revenue (₹) for Sep (previous) and Oct (current)
+    const revenueCurrent = dayIndexes.map(d => 110000 + d * 1500);  // Oct: gently rising
+    const revenuePrevious = dayIndexes.map(d => 100000 + d * 1300); // Sep: slightly lower
+
+    // Daily ad spend (₹) for Sep (previous) and Oct (current)
+    const spendCurrent = dayIndexes.map(d => 35000 + d * 400);  // Oct spend a bit higher
+    const spendPrevious = dayIndexes.map(d => 32000 + d * 350); // Sep slightly lower
+
+    // Derived daily ROAS (ratio) and ROI (%) so KPIs are mathematically consistent
+    const roasCurrent = revenueCurrent.map((rev, idx) => rev / spendCurrent[idx]); // ~3.1–3.4x
+    const roasPrevious = revenuePrevious.map((rev, idx) => rev / spendPrevious[idx]);
+
+    const roiCurrent = revenueCurrent.map(
+        (rev, idx) => ((rev - spendCurrent[idx]) / spendCurrent[idx]) * 100
+    ); // ~210–240%
+    const roiPrevious = revenuePrevious.map(
+        (rev, idx) => ((rev - spendPrevious[idx]) / spendPrevious[idx]) * 100
+    );
+
+    // Attach into the structure used by renderKpiCards()
     const sampleData = {
-      revenue: {
-        // e.g., daily revenue for current & previous month
-        current: [1200, 1350, 1600, 1550, 1800, 1750, 1900, 2000, 2100, 2200, 2300, 2250, 2400, 2500, 2600],
-        previous: [1000, 1100, 1200, 1300, 1350, 1400, 1450, 1500, 1550, 1600, 1620, 1650, 1700, 1750, 1800]
-      },
-      spend: {
-        current: [400, 420, 450, 460, 480, 500, 520, 530, 540, 560, 570, 580, 600, 610, 620],
-        previous: [380, 390, 400, 405, 410, 420, 430, 435, 440, 445, 450, 455, 460, 465, 470]
-      },
-      roas: {
-        // treat as daily blended value; we'll average up to date
-        current: [2.8, 3.0, 3.1, 3.0, 3.2, 3.3, 3.4, 3.5, 3.4, 3.6, 3.7, 3.6, 3.8, 3.9, 4.0],
-        previous: [2.4, 2.5, 2.6, 2.7, 2.7, 2.8, 2.9, 2.9, 3.0, 3.0, 3.1, 3.1, 3.2, 3.2, 3.3]
-      },
-      roi: {
-        // percentage points
-        current: [42, 44, 45, 47, 48, 49, 50, 52, 51, 53, 54, 55, 56, 57, 58],
-        previous: [35, 36, 37, 38, 39, 40, 41, 42, 42, 43, 44, 44, 45, 45, 46]
-      }
+        revenue: {
+            current: revenueCurrent,   // October
+            previous: revenuePrevious  // September
+        },
+        spend: {
+            current: spendCurrent,
+            previous: spendPrevious
+        },
+        roas: {
+            current: roasCurrent,
+            previous: roasPrevious
+        },
+        roi: {
+            current: roiCurrent,
+            previous: roiPrevious
+        }
     };
 
     function sumToDate(arr, day) {
@@ -710,66 +732,77 @@ function createDetailCard(title, subtitle, withCanvas = true) {
 // Funnel: Spend → Revenue → ROI → ROAS for Meta & Google
 const funnelData = {
     meta: [
-        { stage: 'Spend',   value: 60000 },
-        { stage: 'Revenue', value: 150000 },
-        { stage: 'ROAS',    value: 0.78 },
-        { stage: 'ROI',     value: 0.2 },   // 270%
+        { stage: 'Spend',   value: 450000 },   // ₹4.5L
+        { stage: 'Revenue', value: 1400000 }, // ₹14L
+        { stage: 'ROAS',    value: 3.11 },    // 1.4M / 0.45M ≈ 3.11x
+        { stage: 'ROI',     value: 2.11 }     // (Rev - Spend)/Spend ≈ 211%
     ],
     google: [
-        { stage: 'Spend',   value: 40000 },
-        { stage: 'Revenue', value: 220000 },
-        { stage: 'ROAS',    value: 1.75 },
-        { stage: 'ROI',     value: 0.75 },  // 275%
+        { stage: 'Spend',   value: 600000 },   // ₹6L
+        { stage: 'Revenue', value: 2200000 }, // ₹22L
+        { stage: 'ROAS',    value: 3.67 },    // 2.2M / 0.6M ≈ 3.67x
+        { stage: 'ROI',     value: 2.67 }     // ≈ 267%
     ]
 };
 
-// CAC trends: blended vs paid
+// CAC trends: blended vs paid + split by Meta vs Google (May → Oct, Oct is latest)
 const cacTrendData = {
     labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
-    blendedCAC: [950, 920, 890, 870, 840, 820],
-    paidCAC:    [1200, 1150, 1100, 1050, 980, 950],
-	metaCAC:   [1150, 1100, 1050, 980, 950, 930],
-    googleCAC: [1250, 1200, 1150, 1100, 1040, 990]
+    // Overall CAC (all channels blended) – moving downward
+    blendedCAC: [1140, 1120, 1100, 1080, 1050, 1020],
+    // Paid-only CAC (Meta + Google) – higher than blended but improving
+    paidCAC:    [1600, 1580, 1550, 1520, 1480, 1450],
+    // Channel-wise CAC
+    metaCAC:    [1500, 1480, 1460, 1440, 1420, 1400],
+    googleCAC:  [1750, 1720, 1690, 1660, 1620, 1580]
 };
 
 // Paid campaign ROI by lead stage (Meta vs Google)
+// Final "Converted" stage roughly matches the October ROI in funnelData.
 const paidCampaignRoiByStage = {
     labels: ['Lead', 'MQL', 'SQL', 'Converted'],
-    metaRoiPercent:   [80, 130, 170, 210],
-    googleRoiPercent: [70, 120, 160, 200]
+    metaRoiPercent:   [80, 150, 190, 210], // % ROI per stage for Meta
+    googleRoiPercent: [70, 140, 180, 265]  // Google stronger at final stage
 };
 
-// Pipeline value attributed to marketing
+// Pipeline value attributed to marketing (≈ 3x of monthly revenue)
 const pipelineValueData = {
     labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
-    pipelineValue: [2500000, 2800000, 3050000, 3200000, 3500000, 3800000]
+    pipelineValue: [
+        6600000,  // May  (₹66L)
+        7200000,  // Jun  (₹72L)
+        7950000,  // Jul  (₹79.5L)
+        8700000,  // Aug  (₹87L)
+        9600000,  // Sep  (₹96L)
+        10800000  // Oct  (₹108L)
+    ]
 };
 
-// LTV:CAC summary card
+// LTV:CAC summary card – consistent with overall growth story
 const ltvCacSummary = {
-    ltv: 27000,
-    cac: 8000,
-    ratio: 3.4,
-    status: 'healthy' // 'healthy' | 'warning' | 'risk'
+    ltv: 27000,   // Avg lifetime value per customer (₹27k)
+    cac: 8000,    // Avg CAC (₹8k)
+    ratio: 3.4,   // 3.4 : 1 – healthy
+    status: 'healthy' // badge styling already handled in CSS
 };
 
-// LTV cohorts
+// LTV cohorts – each quarter's cohort gets better
 const ltvCohortData = {
     cohorts: ['Q1 2025', 'Q2 2025', 'Q3 2025', 'Q4 2025'],
-    avgLtv:  [18000, 22000, 26000, 18000]
+    avgLtv:  [20000, 23000, 26000, 10000]
 };
 
-// Attribution accuracy vs baseline
+// Attribution accuracy vs baseline (May → Oct)
 const attributionAccuracyData = {
-    labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-    baseline: [70, 70, 70, 70, 70, 70],
-    actual:   [72, 75, 78, 80, 83, 85]
+    labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+    baseline: [70, 70, 70, 70, 70, 70],  // static old model
+    actual:   [72, 75, 78, 80, 83, 86]   // ScaleX model getting better
 };
 
-// Top channels by ROAS
+// Top channels by ROAS – consistent with funnel where Google slightly beats Meta
 const topChannelsByRoas = {
-    labels: ['Meta Ads', 'Google Search', 'Google Display', 'LinkedIn', 'Affiliate'],
-    roas:   [4.1, 3.8, 3.0, 2.7, 4.3]
+    labels: ['Affiliate', 'Google Search', 'Meta Ads', 'Google Display', 'LinkedIn'],
+    roas:   [4.2, 3.7, 3.1, 2.6, 2.4] // x multiplier
 };
 
 /* ---------- Render Performance Overview detail section ---------- */
