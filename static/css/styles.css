@@ -16,9 +16,9 @@ body {
     background: radial-gradient(circle at top left, #0c614a 0%, rgb(28, 41, 70) 80%, #05143b 100%);
     color: #ffffff;
     overflow-y: auto;
-	scrollbar-width: none;
-	min-height: 100dvh;
-	height: auto;
+	  scrollbar-width: none;
+	  min-height: 100dvh;
+	  height: auto;
 }
 
 /* ===== Header ===== */
@@ -35,14 +35,14 @@ body {
     align-items: center;
     /* background: radial-gradient(circle at top left, #064e3b 0%, #020817 90%, #020817 100%); */
     /* background: radial-gradient(circle at top left, rgb(6 78 59) 0%, rgb(17 24 39) 95%, rgb(3 7 18) 100%); */
-	backdrop-filter: blur(50px);
+	  backdrop-filter: blur(50px);
 }
 
 .header-inner {
-    max-width: 1440px;
+    max-width: 1280px;
     width: 100%;
     margin: 0 auto;
-    padding-right: 16px;
+	padding-right: 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -50,9 +50,9 @@ body {
 }
 
 .page {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
 }
 
 .export-wrapper {
@@ -311,7 +311,7 @@ body {
 .kpi-card {
   border-radius: 16px;
   padding: 10px 10px 8px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -415,4 +415,209 @@ body {
     radial-gradient(circle at top left, rgba(236, 72, 153, 0.16), transparent),
     radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.06), transparent),
     rgba(3, 7, 18, 0.98);
+}
+
+
+
+/* ===== Detail Section Cards (Transparent Version) ===== */
+
+.detail-card {
+    border-radius: 16px;
+    padding: 14px 14px 12px;
+
+    /* Subtle glowing border (emerald tint) */
+    border: 1px solid rgba(52, 211, 153, 0.1);
+    background: transparent;
+    backdrop-filter: blur(6px);
+
+    /* Soft outer glow */
+    box-shadow: 0 4px 18px rgba(16, 185, 129, 0.12),
+                0 0 22px rgba(0, 0, 0, 0.40);
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-card-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+    /* Emerald text tint */
+    color: #34d399;
+}
+
+.detail-card-subtitle {
+    font-size: 0.72rem;
+
+    /* Desaturated slate */
+    color: #9ca3af;
+}
+
+.detail-card-canvas-wrap {
+    margin-top: 4px;
+    flex: 1;
+    min-height: 140px;
+}
+
+.detail-card-canvas-wrap canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
+/* ===== LTV Ratio Card (Transparent) ===== */
+
+.detail-ltv-body {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-ltv-ratio {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #e5e7eb;
+}
+
+.detail-ltv-subtext {
+    font-size: 0.72rem;
+    color: #9ca3af;
+}
+
+/* Status badges tuned for transparent background */
+.detail-ltv-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+    padding: 2px 8px;
+    font-size: 0.68rem;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+.detail-ltv-badge--healthy {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #4ade80;
+}
+
+.detail-ltv-badge--warning {
+    background-color: rgba(234, 179, 8, 0.18);
+    color: #fbbf24;
+}
+
+.detail-ltv-badge--risk {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+/* Responsive Grid */
+#detail-charts {
+	grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 1024px) {
+    #detail-charts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* ===== Chart fullscreen modal ===== */
+
+.chart-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: rgba(3, 7, 18, 0.95);
+    display: flex; /* toggled via .hidden */
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-modal.hidden {
+    display: none;
+}
+
+.chart-modal-inner {
+    width: min(1100px, 96vw);
+    height: min(650px, 80vh);
+    border-radius: 18px;
+    padding: 16px 18px 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+    background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent),
+        radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.16), transparent),
+        rgba(3, 7, 18, 0.98);
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.chart-modal-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e5e7eb;
+}
+
+.chart-modal-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.chart-modal-btn {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    border: 1px solid rgba(148, 163, 253, 0.35);
+    background-color: rgba(15, 23, 42, 0.95);
+    color: #e5e7eb;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+
+.chart-modal-btn:hover {
+    background-color: #10b981;
+    color: #020617;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+}
+
+.chart-modal-btn-close {
+    border-color: rgba(248, 113, 113, 0.55);
+}
+
+.chart-modal-btn-close:hover {
+    background-color: #ef4444;
+    color: #020617;
+}
+
+.chart-modal-body {
+    flex: 1;
+    margin-top: 4px;
+}
+
+.chart-modal-body canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Show zoom cursor on clickable charts */
+.chart-clickable {
+    cursor: zoom-in;
 }

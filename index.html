@@ -7,7 +7,7 @@
     <title>ScaleX Dashboard</title>
 
     <!-- Tailwind -->
-    <link href="./static/css/tailwind.css" rel="stylesheet">
+    <link href="../static/css/tailwind.css" rel="stylesheet">
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -20,7 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
     <!-- Custom styles -->
-    <link rel="stylesheet" href="./static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
 
 
     <!-- Prevent flash -->
@@ -40,7 +40,7 @@
         <div class="header-inner">
             <!-- Left: Brand -->
             <div class="flex items-center space-x-3">
-                <img src="./static/scaletrix-logo.png" alt="Scaletrix.ai Logo" class="logo-img">
+                <img src="../static/scaletrix-logo.png" alt="Scaletrix.ai Logo" class="logo-img">
             </div>
 
             <!-- Right: app_id + logout -->
@@ -60,7 +60,7 @@
                     <strong style="font-size: 0.9rem;">{{client_id}}</strong>
                 </span>
 
-                <button class="logout-button" onclick="location.href='login.html'">
+                <button class="logout-button" onclick="location.href='/login'">
                     <i data-lucide="power" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -228,13 +228,42 @@
         </footer>
     </div>
 
-    <!-- Loader -->
-    <div id="loader" class="hidden fixed inset-0 bg-gray-950 bg-opacity-70 flex items-center justify-center z-50">
-        <div class="animate-spin h-16 w-16 border-4 border-t-emerald-500 border-gray-300 rounded-full"></div>
+    <!-- Chart fullscreen modal -->
+    <div id="chart-modal" class="chart-modal hidden">
+        <div class="chart-modal-inner">
+            <div class="chart-modal-header">
+                <!-- <span id="chart-modal-title" class="chart-modal-title">Chart</span> -->
+                <h3 id="chart-modal-title">Chart</h3>
+                <p id="chart-modal-subtitle" class="text-sm text-slate-300"></p>
+                <div class="chart-modal-actions">
+                    <button id="chart-modal-download-png" class="chart-modal-btn">
+                        PNG
+                    </button>
+                    <button id="chart-modal-download-pdf" class="chart-modal-btn">
+                        PDF
+                    </button>
+                    <button id="chart-modal-close" class="chart-modal-btn chart-modal-btn-close">
+                        ✕
+                    </button>
+                </div>
+            </div>
+            <div class="chart-modal-body">
+                <canvas id="chart-modal-canvas"></canvas>
+            </div>
+        </div>
     </div>
 
-    <!-- Layout JS -->
-    <script src="./static/js/dashboard_layout.js"></script>
+    <!-- Loader -->
+    <div id="loader" class="hidden fixed inset-0 bg-gray-950 bg-opacity-70 flex items-center justify-center z-50">
+
+
+        <!-- Loader -->
+        <div id="loader" class="hidden fixed inset-0 bg-gray-950 bg-opacity-70 flex items-center justify-center z-50">
+            <div class="animate-spin h-16 w-16 border-4 border-t-emerald-500 border-gray-300 rounded-full"></div>
+        </div>
+
+        <!-- Layout JS -->
+        <script src="../static/js/dashboard_layout.js"></script>
 </body>
 
 </html>
