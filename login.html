@@ -201,6 +201,14 @@
         document.querySelector('form').addEventListener('submit', function (e) {
             showLoader();
         });
+
+        document.querySelector('form').addEventListener('submit', function (e) {
+            e.preventDefault();   // stop the POST request
+            showLoader();         // your existing loader
+            setTimeout(() => {
+                window.location.href = "index.html";  // redirect
+            }, 500);
+        });
     </script>
 </body>
 
