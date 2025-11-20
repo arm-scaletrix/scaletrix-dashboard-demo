@@ -4,316 +4,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScaleX Dashboard</title>
-
-    <!-- Tailwind -->
+    <title>ScaleX Login</title>
     <link href="./static/css/tailwind.css" rel="stylesheet">
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <!-- <style>
+        body {
+            background: radial-gradient(circle at top left, #0c614a 0%, rgb(28, 41, 70) 80%, #05143b 100%);
+            visibility: hidden;
+        }
+    </style> -->
+    <style>
+        /* ===== Responsive tweaks for <= 900px ===== */
+        @media (max-width: 900px) {
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+            /* Keep card centered vertically & horizontally */
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 16px;
+            }
 
-    <!-- Lucide icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Lucide screenshot of the dashboard -->
-    <script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
-    <!-- Lucide screenshot into a PDF -->
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+            /* Stack top/bottom, narrower, with side margins */
+            .login-wrapper {
+                flex-direction: column;
+                width: 100%;
+                max-width: 380px;
+                /* controls how narrow the card gets */
+                margin: 0 auto;
+                border-radius: 18px;
+            }
 
-    <!-- Custom styles -->
-    <link rel="stylesheet" href="./static/css/styles.css">
+            .login-left,
+            .login-right {
+                width: 100%;
+            }
 
+            /* Top block: compact, centered content */
+            .login-left {
+                min-height: 250px;
+                padding: 18px 18px 14px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                position: relative;
+            }
 
-    <!-- Prevent flash -->
-    <script>
-        window.onload = () => {
-            document.body.style.visibility = 'visible';
-            if (window.lucide) window.lucide.createIcons();
-        };
-    </script>
+            /* Move logo into normal flow on small screens */
+            .login-left .logo {
+                position: static;
+                margin-bottom: 8px;
+                height: 60px;
+            }
+
+            /* Smaller heading & text for mobile */
+            .login-left .left-content h1 {
+                font-size: 1.6rem;
+                margin-bottom: 6px;
+            }
+
+            .login-left .left-content p {
+                font-size: 0.8rem;
+            }
+
+            /* Bottom block: compact form */
+            .login-right {
+                padding: 18px 18px 20px;
+            }
+
+            .login-right h2 {
+                font-size: 1.2rem;
+                margin-bottom: 14px;
+            }
+
+            .login-right label,
+            .login-footer {
+                font-size: 0.8rem;
+                margin-bottom: 4px;
+            }
+
+            /* Inputs & button: narrower than full, follow screen */
+            .login-input,
+            .login-button {
+                max-width: 280px;
+                /* controls field width */
+                width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+                font-size: 0.85rem;
+                padding-top: 8px;
+                padding-bottom: 8px;
+            }
+
+            .login-button {
+                margin-top: 4px;
+            }
+
+            form .space-y-5>*+* {
+                margin-top: 10px;
+                /* tighten vertical gaps a bit */
+            }
+        }
+    </style>
 </head>
 
-<body style="visibility:hidden">
+<body class="min-h-screen flex items-center justify-center bg-gray-950 text-white text-sm">
+    <!-- <div class="flex w-full max-w-4xl shadow-xl rounded-2xl overflow-hidden border border-gray-800"> -->
+    <div style="box-shadow: 0 0 14px rgba(255, 255, 255, 0.4)"
+        class="login-wrapper flex w-full max-w-4xl rounded-2xl overflow-hidden">
 
-    <!-- FIXED HEADER (background capped via inner container) -->
-    <!-- <header id="main-header" class="fixed top-0 inset-x-0 z-40 bg-gradient-to-r from-emerald-900 via-gray-900 to-gray-950 shadow-lg"> -->
-    <header id="main-header">
-        <div class="header-inner">
-            <!-- Left: Brand -->
-            <div class="flex items-center space-x-3">
-                <a href="./index.html">
-                    <img src="./static/scaletrix-logo.png" alt="Scaletrix.ai Logo" class="logo-img">
-                </a>
-            </div>
-
-            <!-- Right: app_id + logout -->
-            <div class="flex items-center space-x-3">
-                <!-- Export dropdown -->
-                <div class="export-wrapper">
-                    <button id="export-toggle" class="export-button rounded-lg">
-                        export
-                    </button>
-                    <div id="export-menu" class="export-menu hidden">
-                        <button class="export-option" data-format="pdf">Export as PDF</button>
-                        <button class="export-option" data-format="png">Export as Image</button>
-                    </div>
-                </div>
-
-                <span id="client-id-display" class="client-id-text">
-                    <strong style="font-size: 0.9rem;">{{client_id}}</strong>
-                </span>
-
-                <button class="logout-button" onclick="location.href='./login.html'">
-                    <i data-lucide="power" class="w-5 h-5"></i>
-                </button>
+        <!-- Left Side - Image/Gradient Section -->
+        <div
+            class="w-1/2 bg-gradient-to-br from-gray-800 via-emerald-700 to-gray-900 flex items-center justify-center relative login-left">
+            <!-- <div class="w-1/2 flex items-center justify-center relative"> -->
+            <!-- Company Logo -->
+            <img src="./static/scaletrix-logo.png" alt="Scaletrix.ai Logo"
+                class="logo absolute top-2 left-2 h-16 object-contain">
+            <div class="left-content text-center">
+                <h1 class="text-4xl font-bold text-white">Welcome Back!</h1>
+                <p class="mt-4 text-white/80">Login to access your personalized dashboard.</p>
             </div>
         </div>
-    </header>
 
-    <div class="page">
-        <!-- MAIN LAYOUT (centered, max width) -->
-        <div class="layout-container">
-            <!-- SIDEBAR (full-height column) -->
-            <aside class="sidebar box-shadow-cust">
-                <nav>
-                    <ul class="space-y-3 pt-4">
-                        <li class="sidebar-link active">
-                            Performance Overview
-                        </li>
-                        <li class="sidebar-link">
-                            Channel &amp; Campaign Analytics
-                        </li>
-                        <!-- <li class="sidebar-link">
-                            Attribution &amp; Signal Health
-                        </li>
-                        <li class="sidebar-link">
-                            Funnel &amp; Lead Journey
-                        </li> -->
-                    </ul>
-                </nav>
-            </aside>
+        <!-- Right Side - Login Form -->
+        <div class="w-1/2 bg-gray-900 p-10 login-right">
+            <!-- <div class="w-1/2 p-10"> -->
+            <h2 class="text-2xl font-semibold mb-6 text-white">User Login</h2>
+            <!-- Insert Error Message block here -->
 
-            <!-- CONTENT -->
-            <main id="main-content" class="main-content">
-                <!-- Heading (syncs with sidebar selection) -->
-                <h2 id="main-heading" class="text-2xl font-bold mb-4">
-                    Performance Overview
-                </h2>
-
-                <!-- Grouping & Filtering (hidden for now) -->
-                <div id="filter-section" class=" mt-4 rounded-lg">
-                    <div id="filter-header" class="flex justify-between items-center px-4 py-3 cursor-pointer"
-                        onclick="toggleFilterSection()">
-                        <h3 class="text-sm font-semibold text-white">Grouping and Filtering</h3>
-                        <i id="filter-toggle-arrow" data-lucide="chevron-down"
-                            class="w-4 h-4 text-white transition-transform duration-200"></i>
-                    </div>
-
-                    <div id="filter-content" class="hidden p-4">
-                        <div id="filters-container" class="flex flex-wrap gap-4"></div>
-                        <div id="filter-button" class="mt-4">
-                            <button onclick="window.handleFilterSubmit && handleFilterSubmit()"
-                                class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg cursor-pointer">
-                                Apply filters
-                            </button>
-                        </div>
-                    </div>
+            <form action="/login" method="POST" class="space-y-5">
+                <!-- Username -->
+                <div>
+                    <label class="block text-gray-300">Username</label>
+                    <input type="text" name="app_id" placeholder="App ID"
+                        class="w-full px-4 py-2 border border-emerald-500 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-[1px] focus:ring-emerald-500"
+                        required>
                 </div>
 
-                <!-- KPI CARDS (placeholder) -->
-                <div id="kpi-cards" class="kpi-grid mt-4">
-
-                    <!-- Revenue -->
-                    <div class="kpi-card kpi-revenue">
-                        <div class="kpi-card-header">
-                            <span class="kpi-label">Revenue</span>
-                            <span id="rev-change" class="kpi-change">--</span>
-                        </div>
-                        <div class="kpi-main">
-                            <div class="kpi-value-wrap">
-                                <div id="rev-current" class="kpi-value">--</div>
-                                <div id="rev-prev" class="kpi-prev">Prev: --</div>
-                            </div>
-                            <div class="kpi-chart-wrap">
-                                <canvas id="rev-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Spend -->
-                    <div class="kpi-card kpi-spend">
-                        <div class="kpi-card-header">
-                            <span class="kpi-label">Spend</span>
-                            <span id="spend-change" class="kpi-change">--</span>
-                        </div>
-                        <div class="kpi-main">
-                            <div class="kpi-value-wrap">
-                                <div id="spend-current" class="kpi-value">--</div>
-                                <div id="spend-prev" class="kpi-prev">Prev: --</div>
-                            </div>
-                            <div class="kpi-chart-wrap">
-                                <canvas id="spend-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ROAS -->
-                    <div class="kpi-card kpi-roas">
-                        <div class="kpi-card-header">
-                            <span class="kpi-label">ROAS</span>
-                            <span id="roas-change" class="kpi-change">--</span>
-                        </div>
-                        <div class="kpi-main">
-                            <div class="kpi-value-wrap">
-                                <div id="roas-current" class="kpi-value">--</div>
-                                <div id="roas-prev" class="kpi-prev">Prev: --</div>
-                            </div>
-                            <div class="kpi-chart-wrap">
-                                <canvas id="roas-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ROI -->
-                    <div class="kpi-card kpi-roi">
-                        <div class="kpi-card-header">
-                            <span class="kpi-label">ROI</span>
-                            <span id="roi-change" class="kpi-change">--</span>
-                        </div>
-                        <div class="kpi-main">
-                            <div class="kpi-value-wrap">
-                                <div id="roi-current" class="kpi-value">--</div>
-                                <div id="roi-prev" class="kpi-prev">Prev: --</div>
-                            </div>
-                            <div class="kpi-chart-wrap">
-                                <canvas id="roi-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
+                <!-- Password -->
+                <div>
+                    <label class="block text-gray-300">Password</label>
+                    <input type="password" name="password" placeholder="**********"
+                        class="w-full px-4 py-2 border border-emerald-500 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-[1px] focus:ring-emerald-500"
+                        required>
                 </div>
 
-                <!-- SMART ALERTS -->
-                <div id="smart-alerts" class="smart-alerts">
-                    <h3 class="smart-alerts-title">Smart Alerts</h3>
-                    <!-- Optional description text -->
-                    <!-- <p class="smart-alerts-subtitle">
-                        Preview of the Smart Insights &amp; Alerts panel. Values below are sample placeholders to
-                        demonstrate the type of intelligence this section will show.
-                    </p> -->
+                <!-- Forgot Password Link -->
+                <!-- <div class="text-right">
+                    <a href="#" class="text-sm text-emerald-500 hover:underline">Forgot Password?</a>
+                </div> -->
 
-                    <div class="smart-alerts-grid">
+                <!-- Hidden Input for Time Zone -->
+                <input type="hidden" id="time_zone" name="time_zone" />
 
-                        <!-- Performance Gain -->
-                        <div class="alert-card alert-card--performance">
-                            <div>
-                                <p class="alert-text-label">Performance Gain</p>
-                                <p class="alert-text-main">
-                                    ROAS up <span class="alert-highlight-green">18% MoM</span>
-                                </p>
-                                <p class="alert-text-sub">
-                                    Driven by higher CRM match rate.
-                                </p>
-                            </div>
-                            <div class="alert-symbol alert-symbol--green">
-                                ▲
-                            </div>
-                        </div>
+                <!-- Login Button -->
+                <button type="submit"
+                    class="w-full py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition duration-300">Login</button>
 
-                        <!-- Data Quality Alert -->
-                        <div class="alert-card alert-card--data-quality">
-                            <div>
-                                <p class="alert-text-label">Data Quality Alert</p>
-                                <p class="alert-text-main">
-                                    Event recovery <span class="alert-highlight-red">down 12%</span>
-                                </p>
-                                <p class="alert-text-sub">
-                                    Check Meta pixel sync &amp; CRM webhook.
-                                </p>
-                            </div>
-                            <div class="alert-symbol alert-symbol--amber">
-                                ⚠
-                            </div>
-                        </div>
-
-                        <!-- Attribution Insight -->
-                        <div class="alert-card alert-card--attribution">
-                            <div>
-                                <p class="alert-text-label">Attribution Insight</p>
-                                <p class="alert-text-main">
-                                    Google Ads drives <span class="alert-highlight-sky">42% of conversions</span>
-                                </p>
-                                <p class="alert-text-sub">
-                                    Majority from 2-touch journeys with Meta assist.
-                                </p>
-                            </div>
-                            <div class="alert-symbol alert-symbol--sky">
-                                ★
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- DETAIL BLOCK -->
-                <div id="detail-section" class="mt-4 rounded-lg shadow-lg p-6 box-shadow-cust">
-                    <h3 class="text-xl font-semibold mb-4">Detailed View</h3>
-                    <!-- <p class="text-gray-300 mb-4 text-sm">
-                        Note: These container represent the main KPI overview. <br>
-                        This will be displayed metrics like: Spend → Revenue → ROI → ROAS | CAC | Pipeline | LTV:CAC |
-                        Attribution Accuracy | Top Channels by ROAS
-                    </p> -->
-                    <div id="detail-charts" class="grid gap-4">
-                        <!-- JS: insert canvases / SVGs / tables here -->
-                    </div>
-                </div>
-
-
-
-            </main>
-        </div>
-        <footer id="main-footer">
-            <div class="footer-inner">
-                <p>© 2025 <strong>Scaletrix.ai</strong>. All rights reserved.</p>
+                <!-- Register Link -->
+                <p class="text-center text-sm  text-gray-300">Don't have an account?
+                    <a href="register" class="text-emerald-400 hover:underline">Register here</a>
+                </p>
+            </form>
+            <div id="loader"
+                class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+                <div class="animate-spin rounded-full h-16 w-16 border-4 border-t-emerald-500 border-gray-300"></div>
             </div>
-        </footer>
+        </div>
+
     </div>
+    <script>
+        // Call the function when the page loads
+        window.onload = function () {
+            // Make body visible after everything is ready
+            document.body.style.visibility = 'visible';
 
-    <!-- Chart fullscreen modal -->
-    <div id="chart-modal" class="chart-modal hidden">
-        <div class="chart-modal-inner">
-            <div class="chart-modal-header">
-                <!-- <span id="chart-modal-title" class="chart-modal-title">Chart</span> -->
-                <h3 id="chart-modal-title">Chart</h3>
-                <p id="chart-modal-subtitle" class="text-sm text-slate-300"></p>
-                <div class="chart-modal-actions">
-                    <button id="chart-modal-download-png" class="chart-modal-btn">
-                        PNG
-                    </button>
-                    <button id="chart-modal-download-pdf" class="chart-modal-btn">
-                        PDF
-                    </button>
-                    <button id="chart-modal-close" class="chart-modal-btn chart-modal-btn-close">
-                        ✕
-                    </button>
-                </div>
-            </div>
-            <div class="chart-modal-body">
-                <canvas id="chart-modal-canvas"></canvas>
-            </div>
-        </div>
-    </div>
+            // Set timezone input value
+            const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            localStorage.setItem('user_time_zone', userTimeZone);
+            document.getElementById('time_zone').value = userTimeZone;
+        };
 
-    <!-- Loader -->
-    <div id="loader" class="hidden fixed inset-0 bg-gray-950 bg-opacity-70 flex items-center justify-center z-50">
+        // Show loader
+        function showLoader() {
+            document.getElementById('loader').classList.remove('hidden');
+        }
 
+        // Hide loader
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+        }
 
-        <!-- Loader -->
-        <div id="loader" class="hidden fixed inset-0 bg-gray-950 bg-opacity-70 flex items-center justify-center z-50">
-            <div class="animate-spin h-16 w-16 border-4 border-t-emerald-500 border-gray-300 rounded-full"></div>
-        </div>
+        // Example: Show loader when form is submitted
+        document.querySelector('form').addEventListener('submit', function (e) {
+            showLoader();
+        });
 
-        <!-- Layout JS -->
-        <script src="./static/js/dashboard_layout.js"></script>
+        document.querySelector('form').addEventListener('submit', function (e) {
+            e.preventDefault();   // stop the POST request
+            showLoader();         // your existing loader
+            setTimeout(() => {
+                window.location.href = "dashboard.html";  // redirect
+            }, 500);
+        });
+    </script>
 </body>
 
 </html>
