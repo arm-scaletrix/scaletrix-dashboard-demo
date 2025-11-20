@@ -229,12 +229,35 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Default analysis view handler: we can override per analysis key later.
+    // Default analysis view handler: controls detail charts + Smart Alerts visibility
     if (typeof window.handleAnalysisViewChange !== 'function') {
         window.handleAnalysisViewChange = function (key) {
+            const smartAlertsSection = document.getElementById('smart-alerts');
+            const kpiSectionId = document.getElementById('kpi-cards');
+
+            // Show Smart Alerts only on Performance Overview
+            if (smartAlertsSection) {
+                if (key === 'performance-overview') {
+                    smartAlertsSection.classList.remove('hidden');
+                } else {
+                    smartAlertsSection.classList.add('hidden');
+                }
+            }
+
+            // Show KPI cards only on Performance Overview
+            if (kpiSectionId) {
+                if (key === 'performance-overview') {
+                    kpiSectionId.style.display = '';
+                } else {
+                    kpiSectionId.style.display = 'none';
+                }
+            }
+
             // For now, only Performance Overview has detailed charts
             if (key === 'performance-overview') {
-                renderPerformanceOverviewDetails();
+                renderPerformanceOverviewDetails(); // for Performance Overview Page
+            } else if (key === 'channel-campaign-analytics') {
+                renderChannelCampaignDetails(); // for Channel & Campaign Analytics Page
             } else {
                 // Other tabs: clear detail area and show a placeholder
                 clearDetailCharts();
@@ -461,7 +484,13 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('DOMContentLoaded', renderKpiCards);
 
 
+
+
+
+
+
 // --- KPI card testing with sample data ---
+
 // ========= Performance Overview – Detailed View (sample data + renderers) =========
 
 // Keep references to Chart.js instances so we can destroy them when switching views
@@ -729,19 +758,25 @@ function createDetailCard(title, subtitle, withCanvas = true) {
 
 /* ---------- Sample data for Performance Overview detail charts ---------- */
 
-// Funnel: Spend → Revenue → ROI → ROAS for Meta & Google
+// Funnel: Spend → Revenue → ROI → ROAS for Meta, Google & LinkedIn
 const funnelData = {
     meta: [
         { stage: 'Spend',   value: 450000 },   // ₹4.5L
-        { stage: 'Revenue', value: 1400000 }, // ₹14L
-        { stage: 'ROAS',    value: 3.11 },    // 1.4M / 0.45M ≈ 3.11x
-        { stage: 'ROI',     value: 2.11 }     // (Rev - Spend)/Spend ≈ 211%
+        { stage: 'Revenue', value: 1400000 },  // ₹14L
+        { stage: 'ROAS',    value: 3.11 },     // ≈ 3.11x
+        { stage: 'ROI',     value: 2.11 }      // ≈ 211%
     ],
     google: [
         { stage: 'Spend',   value: 600000 },   // ₹6L
-        { stage: 'Revenue', value: 2200000 }, // ₹22L
-        { stage: 'ROAS',    value: 3.67 },    // 2.2M / 0.6M ≈ 3.67x
-        { stage: 'ROI',     value: 2.67 }     // ≈ 267%
+        { stage: 'Revenue', value: 2200000 },  // ₹22L
+        { stage: 'ROAS',    value: 3.67 },     // ≈ 3.67x
+        { stage: 'ROI',     value: 2.67 }      // ≈ 267%
+    ],
+    linkedin: [
+        { stage: 'Spend',   value: 300000 },   // ₹3L
+        { stage: 'Revenue', value: 900000 },   // ₹9L
+        { stage: 'ROAS',    value: 3.00 },     // 3.0x
+        { stage: 'ROI',     value: 2.00 }      // 200%
     ]
 };
 
@@ -754,7 +789,8 @@ const cacTrendData = {
     paidCAC:    [1600, 1580, 1550, 1520, 1480, 1450],
     // Channel-wise CAC
     metaCAC:    [1500, 1480, 1460, 1440, 1420, 1400],
-    googleCAC:  [1750, 1720, 1690, 1660, 1620, 1580]
+    googleCAC:  [1750, 1720, 1690, 1660, 1620, 1580],
+    linkedinCAC: [3800, 4100, 4450, 4600, 4800, 5000]
 };
 
 // Paid campaign ROI by lead stage (Meta vs Google)
@@ -762,7 +798,8 @@ const cacTrendData = {
 const paidCampaignRoiByStage = {
     labels: ['Lead', 'MQL', 'SQL', 'Converted'],
     metaRoiPercent:   [80, 150, 190, 210], // % ROI per stage for Meta
-    googleRoiPercent: [70, 140, 180, 265]  // Google stronger at final stage
+    googleRoiPercent: [70, 140, 180, 265],  // Google stronger at final stage
+    linkedinRoiPercent: [55, 72, 84, 110]
 };
 
 // Pipeline value attributed to marketing (≈ 3x of monthly revenue)
@@ -805,6 +842,17 @@ const topChannelsByRoas = {
     roas:   [4.2, 3.7, 3.1, 2.6, 2.4] // x multiplier
 };
 
+/* === New vs Repeat Revenue Mix (sample data) === */
+const revenueMixData = {
+    months: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+    newPct: [42, 45, 47, 50, 52, 55],          // % from new customers
+    repeatPct: [58, 55, 53, 50, 48, 45],       // % from repeat customers
+
+    // Optional absolute value for tooltips
+    revenueNew: [4.2, 4.5, 4.8, 5.2, 5.4, 5.8],     // in ₹ Lakhs
+    revenueRepeat: [5.8, 5.5, 5.4, 5.2, 5.0, 4.8]   // in ₹ Lakhs
+};
+
 /* ---------- Render Performance Overview detail section ---------- */
 
 function renderPerformanceOverviewDetails() {
@@ -816,213 +864,257 @@ function renderPerformanceOverviewDetails() {
 
 	const metaColor = '#ffce56';   // Light Yellow
 	const googleColor = '#cc65fe'; // Light Purple (French Lilac)
+    const linkedinColor = '#4ade80';// green
 
 	// const metaColor = '#ff6384';   // Light Red
 	// const googleColor = '#9bd0f5'; // Light Blue
 
-    // 1) Funnel – Spend → Revenue → ROI → ROAS (Meta vs Google)
-	(function () {
-	    const meta = funnelData.meta;
-	    const google = funnelData.google;
-	
-	    const stages = ['Spend', 'Revenue', 'ROI', 'ROAS'];
-	
-	    // Build lookup by stage
-	    const metaByStage = meta.reduce((acc, d) => {
-	        acc[d.stage] = d.value;
-	        return acc;
-	    }, {});
-	    const googleByStage = google.reduce((acc, d) => {
-	        acc[d.stage] = d.value;
-	        return acc;
-	    }, {});
-	
-	    // Money axis: only Spend + Revenue
-	    const metaMoney = stages.map(stage =>
-	        (stage === 'Spend' || stage === 'Revenue') ? metaByStage[stage] ?? null : null
-	    );
-	    const googleMoney = stages.map(stage =>
-	        (stage === 'Spend' || stage === 'Revenue') ? googleByStage[stage] ?? null : null
-	    );
-	
-	    // Percent axis: ROI + ROAS (store as percent, not ratio)
-	    const metaRatio = stages.map(stage => {
-	        if (stage === 'ROI' || stage === 'ROAS') {
-	            const v = metaByStage[stage];
-	            return v != null ? v * 100 : null; // 2.7 -> 270
-	        }
-	        return null;
-	    });
-	
-	    const googleRatio = stages.map(stage => {
-	        if (stage === 'ROI' || stage === 'ROAS') {
-	            const v = googleByStage[stage];
-	            return v != null ? v * 100 : null; // 3.7 -> 370
-	        }
-	        return null;
-	    });
-	
-	    const { canvas } = createDetailCard(
-	        'Spend → Revenue → ROI → ROAS',
-	        'Comparison of Meta vs Google funnel performance'
-	    );
-	    if (!canvas) return;
-	
-	    const ctx = canvas.getContext('2d');
-	
-	    const chart = new Chart(ctx, {
-	        type: 'bar',
-	        data: {
-	            labels: stages,
-	            datasets: [
-	                // Money (₹) – left axis
-	                {
-	                    label: 'Meta',
-	                    data: metaMoney,
-	                    yAxisID: 'y',
-	                    backgroundColor: metaColor,
-	                    borderColor: metaColor,
-	                    borderWidth: 1,
-						bar: .9,
-						categoryPercentage: 0.9
-	                },
-	                {
-	                    label: 'Google',
-	                    data: googleMoney,
-	                    yAxisID: 'y',
-	                    backgroundColor: googleColor,
-	                    borderColor: googleColor,
-	                    borderWidth: 1,
-						bar: .9,
-						categoryPercentage: 0.9
-	                },
-	                // Ratios (%) – right axis (hidden from legend)
-	                {
-	                    label: 'Meta (ratio)',
-	                    data: metaRatio,
-	                    yAxisID: 'y1',
-	                    backgroundColor: metaColor,
-	                    borderColor: metaColor,
-	                    borderWidth: 1,
-						bar: .9,
-						categoryPercentage: 0.9
-	                },
-	                {
-	                    label: 'Google (ratio)',
-	                    data: googleRatio,
-	                    yAxisID: 'y1',
-	                    backgroundColor: googleColor,
-	                    borderColor: googleColor,
-	                    borderWidth: 1,
-						bar: .9,
-						categoryPercentage: 0.9
-	                }
-	            ]
-	        },
-	        options: {
-	            responsive: true,
-	            maintainAspectRatio: false,
-	            plugins: {
-	                legend: {
-	                    display: true,
-	                    labels: {
-	                        // Hide the "(ratio)" datasets from the legend
-	                        filter: function (item) {
-	                            return !item.text.includes('(ratio)');
-	                        }
-	                    },
-	                    // Sync ratio datasets with legend clicks
-	                    onClick: function (e, legendItem, legend) {
-	                        const chart = legend.chart;
-	                        const index = legendItem.datasetIndex;
-						
-	                        // dataset 0 -> Meta (money), link to index 2 (Meta ratio)
-	                        // dataset 1 -> Google (money), link to index 3 (Google ratio)
-	                        let ratioIndex = null;
-	                        if (index === 0) ratioIndex = 2;
-	                        if (index === 1) ratioIndex = 3;
-						
-	                        const currentlyVisible = chart.isDatasetVisible(index);
-	                        chart.setDatasetVisibility(index, !currentlyVisible);
-						
-	                        if (ratioIndex !== null) {
-	                            chart.setDatasetVisibility(ratioIndex, !currentlyVisible);
-	                        }
-						
-	                        chart.update();
-	                    }
-	                },
-	                tooltip: {
-	                    callbacks: {
-	                        label: function (ctx) {
-	                            const stage = ctx.label;
-	                            const raw = ctx.raw;
-	                            if (raw == null) return '';
-							
-	                            const baseLabel = ctx.dataset.label.replace(' (ratio)', '');
-							
-	                            if (stage === 'Spend' || stage === 'Revenue') {
-	                                return `${baseLabel}: ₹ ${raw.toLocaleString()}`;
-	                            }
-	                            if (stage === 'ROI') {
-	                                // raw is percent
-	                                return `${baseLabel}: ${raw.toFixed(1)}%`;
-	                            }
-	                            if (stage === 'ROAS') {
-	                                // raw is percent, convert back to x
-	                                const xVal = raw / 100;
-	                                return `${baseLabel}: ${xVal.toFixed(2)}x`;
-	                            }
-	                            return `${baseLabel}: ${raw}`;
-	                        }
-	                    }
-	                }
-	            },
-	            scales: {
-	                x: {
-	                    stacked: true
-	                },
-	                // Money axis (left)
-	                y: {
-	                    position: 'left',
-						stacked: true,
-	                    beginAtZero: true,
-	                    ticks: {
-	                        callback: function (value) {
-	                            if (value >= 10000000) {
-	                                return `₹${(value / 10000000).toFixed(1)}Cr`;
-	                            }
-	                            if (value >= 100000) {
-	                                return `₹${(value / 100000).toFixed(1)}L`;
-	                            }
-	                            if (value >= 1000) {
-	                                return `₹${(value / 1000).toFixed(1)}k`;
-	                            }
-	                            return `₹${value}`;
-	                        }
-	                    }
-	                },
-	                // Percentage axis (right) for ROI & ROAS
-	                y1: {
-	                    position: 'right',
-						stacked: true,
-	                    beginAtZero: true,
-	                    grid: {
-	                        drawOnChartArea: false
-	                    },
-	                    ticks: {
-	                        callback: function (value) {
-	                            return `${value}%`;
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	    });
-	
-	    scalexDetailCharts.push(chart);
-		scalexChartRegistry.set(ctx.canvas, chart);
-	})();
+    // 1) Funnel – Spend → Revenue → ROI → ROAS (Meta vs Google vs LinkedIn)
+(function () {
+    const meta = funnelData.meta;
+    const google = funnelData.google;
+    const linkedin = funnelData.linkedin;
+
+    const stages = ['Spend', 'Revenue', 'ROI', 'ROAS'];
+
+    // Build lookup by stage
+    const metaByStage = meta.reduce((acc, d) => {
+        acc[d.stage] = d.value;
+        return acc;
+    }, {});
+    const googleByStage = google.reduce((acc, d) => {
+        acc[d.stage] = d.value;
+        return acc;
+    }, {});
+    const linkedinByStage = linkedin.reduce((acc, d) => {
+        acc[d.stage] = d.value;
+        return acc;
+    }, {});
+
+    // Money axis: only Spend + Revenue
+    const metaMoney = stages.map(stage =>
+        (stage === 'Spend' || stage === 'Revenue') ? metaByStage[stage] ?? null : null
+    );
+    const googleMoney = stages.map(stage =>
+        (stage === 'Spend' || stage === 'Revenue') ? googleByStage[stage] ?? null : null
+    );
+    const linkedinMoney = stages.map(stage =>
+        (stage === 'Spend' || stage === 'Revenue') ? linkedinByStage[stage] ?? null : null
+    );
+
+    // Percent axis: ROI + ROAS (store as percent, not ratio)
+    const metaRatio = stages.map(stage => {
+        if (stage === 'ROI' || stage === 'ROAS') {
+            const v = metaByStage[stage];
+            return v != null ? v * 100 : null; // 2.7 -> 270
+        }
+        return null;
+    });
+
+    const googleRatio = stages.map(stage => {
+        if (stage === 'ROI' || stage === 'ROAS') {
+            const v = googleByStage[stage];
+            return v != null ? v * 100 : null; // 3.7 -> 370
+        }
+        return null;
+    });
+
+    const linkedinRatio = stages.map(stage => {
+        if (stage === 'ROI' || stage === 'ROAS') {
+            const v = linkedinByStage[stage];
+            return v != null ? v * 100 : null;
+        }
+        return null;
+    });
+
+    const { canvas } = createDetailCard(
+        'Spend → Revenue → ROI → ROAS',
+        'Comparison of Meta, Google & LinkedIn funnel performance'
+    );
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: stages,
+            datasets: [
+                // Money (₹) – left axis
+                {
+                    label: 'Meta',
+                    data: metaMoney,
+                    yAxisID: 'y',
+                    backgroundColor: metaColor,
+                    borderColor: metaColor,
+                    borderWidth: 1,
+                    bar: 0.9,
+                    categoryPercentage: 0.9
+                },
+                {
+                    label: 'Google',
+                    data: googleMoney,
+                    yAxisID: 'y',
+                    backgroundColor: googleColor,
+                    borderColor: googleColor,
+                    borderWidth: 1,
+                    bar: 0.9,
+                    categoryPercentage: 0.9
+                },
+                {
+                    label: 'LinkedIn',
+                    data: linkedinMoney,
+                    yAxisID: 'y',
+                    backgroundColor: linkedinColor,
+                    borderColor: linkedinColor,
+                    borderWidth: 1,
+                    bar: 0.9,
+                    categoryPercentage: 0.9
+                },
+
+                // Ratios (%) – right axis (hidden from legend)
+                {
+                    label: 'Meta (ratio)',
+                    data: metaRatio,
+                    yAxisID: 'y1',
+                    backgroundColor: metaColor,
+                    borderColor: metaColor,
+                    borderWidth: 1,
+                    bar: 0.9,
+                    categoryPercentage: 0.9
+                },
+                {
+                    label: 'Google (ratio)',
+                    data: googleRatio,
+                    yAxisID: 'y1',
+                    backgroundColor: googleColor,
+                    borderColor: googleColor,
+                    borderWidth: 1,
+                    bar: 0.9,
+                    categoryPercentage: 0.9
+                },
+                {
+                    label: 'LinkedIn (ratio)',
+                    data: linkedinRatio,
+                    yAxisID: 'y1',
+                    backgroundColor: linkedinColor,
+                    borderColor: linkedinColor,
+                    borderWidth: 1,
+                    bar: 0.9,
+                    categoryPercentage: 0.9
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        // Hide the "(ratio)" datasets from the legend
+                        filter: function (item) {
+                            return !item.text.includes('(ratio)');
+                        },
+                        usePointStyle: true,
+                        pointStyle: 'rectRounded',
+                        boxWidth: 20,
+                        boxHeight: 10
+                    },
+                    // Sync ratio datasets with legend clicks
+                    onClick: function (e, legendItem, legend) {
+                        const chart = legend.chart;
+                        const index = legendItem.datasetIndex;
+
+                        // dataset 0 -> Meta (money), link to index 3 (Meta ratio)
+                        // dataset 1 -> Google (money), link to index 4 (Google ratio)
+                        // dataset 2 -> LinkedIn (money), link to index 5 (LinkedIn ratio)
+                        let ratioIndex = null;
+                        if (index === 0) ratioIndex = 3;
+                        if (index === 1) ratioIndex = 4;
+                        if (index === 2) ratioIndex = 5;
+
+                        const currentlyVisible = chart.isDatasetVisible(index);
+                        chart.setDatasetVisibility(index, !currentlyVisible);
+
+                        if (ratioIndex !== null) {
+                            chart.setDatasetVisibility(ratioIndex, !currentlyVisible);
+                        }
+
+                        chart.update();
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (ctx) {
+                            const stage = ctx.label;
+                            const raw = ctx.raw;
+                            if (raw == null) return '';
+
+                            const baseLabel = ctx.dataset.label.replace(' (ratio)', '');
+
+                            if (stage === 'Spend' || stage === 'Revenue') {
+                                return `${baseLabel}: ₹ ${raw.toLocaleString()}`;
+                            }
+                            if (stage === 'ROI') {
+                                // raw is percent
+                                return `${baseLabel}: ${raw.toFixed(1)}%`;
+                            }
+                            if (stage === 'ROAS') {
+                                // raw is percent, convert back to x
+                                const xVal = raw / 100;
+                                return `${baseLabel}: ${xVal.toFixed(2)}x`;
+                            }
+                            return `${baseLabel}: ${raw}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true
+                },
+                // Money axis (left)
+                y: {
+                    position: 'left',
+                    stacked: true,
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value) {
+                            if (value >= 10000000) {
+                                return `₹${(value / 10000000).toFixed(1)}Cr`;
+                            }
+                            if (value >= 100000) {
+                                return `₹${(value / 100000).toFixed(1)}L`;
+                            }
+                            if (value >= 1000) {
+                                return `₹${(value / 1000).toFixed(1)}k`;
+                            }
+                            return `₹${value}`;
+                        }
+                    }
+                },
+                // Percentage axis (right) for ROI & ROAS
+                y1: {
+                    position: 'right',
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    ticks: {
+                        callback: function (value) {
+                            return `${value}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    scalexDetailCharts.push(chart);
+    scalexChartRegistry.set(ctx.canvas, chart);
+})();
 
     // 2) Blended CAC vs Paid CAC – trend lines
     (function () {
@@ -1063,7 +1155,15 @@ function renderPerformanceOverviewDetails() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: true },
+                    legend: {
+                        display: true,
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 20,
+                            boxHeight: 10
+                        }
+                    },
                     tooltip: {
                         callbacks: {
                             label: (ctx) =>
@@ -1085,71 +1185,88 @@ function renderPerformanceOverviewDetails() {
 		scalexChartRegistry.set(ctx.canvas, chart);
     })();
 
-	// 3) Meta CAC vs Google CAC – trend lines
-	(function () {
-	    const { labels, metaCAC, googleCAC } = cacTrendData;
-	    const { canvas } = createDetailCard(
-	        'Meta CAC vs Google CAC',
-	        'Customer acquisition cost by channel over time'
-	    );
-	    if (!canvas) return;
-
-	    const ctx = canvas.getContext('2d');
-	    const chart = new Chart(ctx, {
-	        type: 'line',
-	        data: {
-	            labels,
-	            datasets: [
-	                {
-	                    label: 'Meta CAC',
-	                    data: metaCAC,
-	                    tension: 0.2,
-	                    fill: false,
-	                    borderWidth: 2,
-	                    borderColor: metaColor,
-	                    backgroundColor: metaColor
-	                },
-	                {
-	                    label: 'Google CAC',
-	                    data: googleCAC,
-	                    tension: 0.2,
-	                    fill: false,
-	                    borderColor: googleColor,
-	                    backgroundColor: googleColor,
-	                    borderWidth: 2
-	                }
-	            ]
-	        },
-	        options: {
-	            responsive: true,
-	            maintainAspectRatio: false,
-	            plugins: {
-	                legend: { display: true },
-	                tooltip: {
-	                    callbacks: {
-	                        label: (ctx) =>
-	                            `${ctx.dataset.label}: ₹ ${ctx.raw.toLocaleString()}`
-	                    }
-	                }
-	            },
-	            scales: {
-	                y: {
-	                    beginAtZero: false,
-	                    ticks: {
-	                        callback: (value) => `₹${value}`
-	                    }
-	                }
-	            }
-	        }
-	    });
-
-	    scalexDetailCharts.push(chart);
-	    scalexChartRegistry.set(ctx.canvas, chart);
-	})();
-
-    // 4) Paid Campaign ROI (%) by stage
+	/* 3) Meta · Google · LinkedIn – CAC Trend Lines */
     (function () {
-        const { labels, metaRoiPercent, googleRoiPercent } = paidCampaignRoiByStage;
+        const { labels, metaCAC, googleCAC, linkedinCAC } = cacTrendData;
+        const { canvas } = createDetailCard(
+            'CAC Trend – Meta · Google · LinkedIn',
+            'Customer acquisition cost by channel over time'
+        );
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Meta CAC',
+                        data: metaCAC,
+                        tension: 0.2,
+                        fill: false,
+                        borderWidth: 2,
+                        borderColor: metaColor,
+                        backgroundColor: metaColor
+                    },
+                    {
+                        label: 'Google CAC',
+                        data: googleCAC,
+                        tension: 0.2,
+                        fill: false,
+                        borderWidth: 2,
+                        borderColor: googleColor,
+                        backgroundColor: googleColor
+                    },
+                    {
+                        label: 'LinkedIn CAC',
+                        data: linkedinCAC,
+                        tension: 0.2,
+                        fill: false,
+                        borderWidth: 2,
+                        borderColor: linkedinColor,
+                        backgroundColor: linkedinColor
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 20,
+                            boxHeight: 10
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label}: ₹ ${ctx.raw.toLocaleString()}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: (value) => `₹${value}`
+                        }
+                    }
+                }
+            }
+        });
+
+        scalexDetailCharts.push(chart);
+        scalexChartRegistry.set(ctx.canvas, chart);
+    })();
+
+    /* 4) Paid Campaign ROI (%) by Stage – Meta · Google · LinkedIn */
+    (function () {
+        const { labels, metaRoiPercent, googleRoiPercent, linkedinRoiPercent } = paidCampaignRoiByStage;
         const { canvas } = createDetailCard(
             'Paid Campaign ROI (%) by Stage',
             'ROI across Lead → MQL → SQL → Converted'
@@ -1157,21 +1274,48 @@ function renderPerformanceOverviewDetails() {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
+
         const chart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels,
                 datasets: [
-                    { label: 'Meta', data: metaRoiPercent, backgroundColor: metaColor, borderColor: metaColor, borderWidth: 1 },
-                    { label: 'Google', data: googleRoiPercent, backgroundColor: googleColor, borderColor: googleColor, borderWidth: 1 }
+                    { 
+                        label: 'Meta',
+                        data: metaRoiPercent,
+                        backgroundColor: metaColor,
+                        borderColor: metaColor,
+                        borderWidth: 1
+                    },
+                    { 
+                        label: 'Google',
+                        data: googleRoiPercent,
+                        backgroundColor: googleColor,
+                        borderColor: googleColor,
+                        borderWidth: 1
+                    },
+                    { 
+                        label: 'LinkedIn',
+                        data: linkedinRoiPercent,
+                        backgroundColor: linkedinColor,
+                        borderColor: linkedinColor,
+                        borderWidth: 1
+                    }
                 ],
             },
             options: {
                 responsive: true,
-				indexAxis: 'x',
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: true },
+                    legend: {
+                        display: true,
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 20,
+                            boxHeight: 10
+                        }
+                    },
                     tooltip: {
                         callbacks: {
                             label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(0)}%`
@@ -1188,11 +1332,12 @@ function renderPerformanceOverviewDetails() {
                 }
             }
         });
+
         scalexDetailCharts.push(chart);
-		scalexChartRegistry.set(ctx.canvas, chart);
+        scalexChartRegistry.set(ctx.canvas, chart);
     })();
 
-    // 4) Pipeline value attributed to marketing
+    // 5) Pipeline value attributed to marketing
     (function () {
         const { labels, pipelineValue } = pipelineValueData;
         const { canvas } = createDetailCard(
@@ -1243,7 +1388,7 @@ function renderPerformanceOverviewDetails() {
 		scalexChartRegistry.set(ctx.canvas, chart);
     })();
 
-    // 5) LTV:CAC ratio card (no chart)
+    // 6) LTV:CAC ratio card (no chart)
     (function () {
         const { ltv, cac, ratio, status } = ltvCacSummary;
         const { card } = createDetailCard(
@@ -1277,7 +1422,7 @@ function renderPerformanceOverviewDetails() {
         card.appendChild(body);
     })();
 
-    // 6) LTV cohorts chart
+    // 7) LTV cohorts chart
     (function () {
         const { cohorts, avgLtv } = ltvCohortData;
         const { canvas } = createDetailCard(
@@ -1327,7 +1472,7 @@ function renderPerformanceOverviewDetails() {
 		scalexChartRegistry.set(ctx.canvas, chart);
     })();
 
-    // 7) Attribution Accuracy Rate (vs baseline)
+    // 8) Attribution Accuracy Rate (vs baseline)
     (function () {
         const { labels, baseline, actual } = attributionAccuracyData;
         const { canvas } = createDetailCard(
@@ -1366,7 +1511,15 @@ function renderPerformanceOverviewDetails() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: true },
+                    legend: {
+                        display: true,
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 20,
+                            boxHeight: 10
+                        }
+                    },
                     tooltip: {
                         callbacks: {
                             label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`
@@ -1387,7 +1540,7 @@ function renderPerformanceOverviewDetails() {
 		scalexChartRegistry.set(ctx.canvas, chart);
     })();
 
-    // 8) Top channels by ROAS
+    // 9) Top channels by ROAS
     (function () {
         const { labels, roas } = topChannelsByRoas;
         const { canvas } = createDetailCard(
@@ -1433,4 +1586,835 @@ function renderPerformanceOverviewDetails() {
         scalexDetailCharts.push(chart);
 		scalexChartRegistry.set(ctx.canvas, chart);
     })();
+
+    /* 10) New vs Repeat Revenue Mix – 100% stacked bar */
+    (function () {
+        const { months, newPct, repeatPct, revenueNew, revenueRepeat } = revenueMixData;
+
+        const { canvas } = createDetailCard(
+            'New vs Repeat Revenue Mix',
+            'Share of revenue contributed by new vs returning customers'
+        );
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'New Customers',
+                        data: newPct,
+                        backgroundColor: metaColor
+                    },
+                    {
+                        label: 'Repeat Customers',
+                        data: repeatPct,
+                        backgroundColor: googleColor
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 20,
+                            boxHeight: 10
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => {
+                                const i = items[0].dataIndex;
+                                return `${months[i]} 2025`;
+                            },
+                            label: (ctx) => {
+                                const idx = ctx.dataIndex;
+
+                                if (ctx.dataset.label.includes('New')) {
+                                    return `New: ${newPct[idx]}% (₹ ${(revenueNew[idx]).toFixed(1)}L)`;
+                                }
+                                if (ctx.dataset.label.includes('Repeat')) {
+                                    return `Repeat: ${repeatPct[idx]}% (₹ ${(revenueRepeat[idx]).toFixed(1)}L)`;
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: {
+                            color: 'rgba(255,255,255,0.04)'
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: (v) => `${v}%`
+                        },
+                        grid: {
+                            color: 'rgba(255,255,255,0.07)'
+                        }
+                    }
+                }
+            }
+        });
+
+        scalexDetailCharts.push(chart);
+        scalexChartRegistry.set(ctx.canvas, chart);
+    })();
+
+}
+
+
+/* ---------- Sample data for Channel & Campaign Analytics detail charts ---------- */
+
+const channelEfficiencyData = {
+    channels: ['Meta Ads', 'Google Ads', 'LinkedIn'],
+    // CPL & CAC in ₹ (for tooltips); we’ll normalize axis later if needed
+    cpl: [2400, 1800, 2600],
+    cac: [3200, 4050, 3600],
+    // ROAS as ratio (x)
+    roas: [3.1, 3.7, 2.8]
+};
+
+const campaignRoiBubbleData = [
+    {
+        name: 'Meta – Lead Gen',
+        channel: 'Meta',
+        roi: 220,         // %
+        spendLakh: 3.2,   // ₹3.2L
+        revenueLakh: 10.1,
+        incrRoas: 28      // +28% incremental ROAS vs baseline
+    },
+    {
+        name: 'Google – Search Brand',
+        channel: 'Google',
+        roi: 260,
+        spendLakh: 4.5,
+        revenueLakh: 16.3,
+        incrRoas: 35
+    },
+    {
+        name: 'Google – Performance Max',
+        channel: 'Google',
+        roi: 210,
+        spendLakh: 2.9,
+        revenueLakh: 9.0,
+        incrRoas: 18
+    },
+    {
+        name: 'LinkedIn – ABM',
+        channel: 'LinkedIn',
+        roi: 160,
+        spendLakh: 1.8,
+        revenueLakh: 4.7,
+        incrRoas: 12
+    }
+];
+
+const creativePerformanceSummary = {
+    ctr: {
+        latest: 3.4,
+        delta: 0.6,      // percentage points
+        direction: 'up',
+        unit: '%'
+    },
+    cpc: {
+        latest: 22,
+        delta: -12,      // %
+        direction: 'down',
+        unit: '₹'
+    },
+    engagement: {
+        latest: 8.5,
+        delta: 1.1,      // percentage points
+        direction: 'up',
+        unit: '%'
+    }
+};
+
+const audienceRoasData = {
+    labels: ['New Visitors', 'Repeat Buyers', 'CRM Lookalike', 'Remarketing'],
+    roas:   [2.4, 3.3, 3.1, 2.8]
+};
+
+const leadQualityData = {
+    channels: ['Google Ads', 'Meta Ads', 'LinkedIn'],
+    scores:  [82, 74, 66]
+};
+
+const spendEfficiencyData = {
+    channels:    ['Google Ads', 'Meta Ads', 'YouTube', 'LinkedIn'],
+    spendShare:  [38, 24, 22, 16],  // % of total spend
+    revenueShare:[43, 19, 18, 20]   // % of total revenue contribution
+};
+
+const touchPointSplitData = {
+    channels: ['Meta Ads', 'Google Ads', 'Direct'],
+    first:    [45, 30, 25],  // % of revenue coming from first-touch
+    mid:      [35, 40, 10],
+    last:     [20, 30, 65]
+};
+
+const channelPerformanceTableData = [
+    {
+        channel: 'Meta Ads',
+        spend: 325000,
+        revenue: 1010000,
+        cpl: 2400,
+        cac: 3200,
+        roas: 3.1,
+        roi: 220,
+        leadQuality: 74
+    },
+    {
+        channel: 'Google Ads',
+        spend: 270000,
+        revenue: 990000,
+        cpl: 1900,
+        cac: 4050,
+        roas: 3.7,
+        roi: 260,
+        leadQuality: 82
+    },
+    {
+        channel: 'LinkedIn',
+        spend: 160000,
+        revenue: 520000,
+        cpl: 2600,
+        cac: 3600,
+        roas: 2.8,
+        roi: 160,
+        leadQuality: 66
+    }
+];
+
+/* ---------- Render Channel & Campaign Analytics detail section ---------- */
+
+function renderChannelCampaignDetails() {
+    clearDetailCharts();
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js not available');
+        return;
+    }
+
+    // Reuse a consistent palette
+    const metaColor = '#ffce56';    // yellow
+    const googleColor = '#cc65fe';  // purple
+    const linkedinColor = '#4ade80';// green
+    const neutralBar = '#9ca3af';   // gray for helper bars
+
+    /* 1) Channel-wise CPL · CAC · ROAS */
+    (function () {
+        const { channels, cpl, cac, roas } = channelEfficiencyData;
+        const { canvas } = createDetailCard(
+            'Channel-wise CPL · CAC · ROAS',
+            'CPL & CAC in ₹ (bottom axis), ROAS on hidden secondary axis'
+        );
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: channels,
+                datasets: [
+                    {
+                        label: 'CPL (₹)',
+                        data: cpl,
+                        backgroundColor: metaColor,
+                        xAxisID: 'x1',
+                    },
+                    {
+                        label: 'CAC (₹)',
+                        data: cac,
+                        backgroundColor: googleColor,
+                        xAxisID: 'x1',
+                    },
+                    {
+                        label: 'ROAS (x)',
+                        data: roas,
+                        backgroundColor: linkedinColor,
+                        xAxisID: 'x2',     // ← ROAS uses hidden secondary axis
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 20,
+                            boxHeight: 10
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const label = ctx.dataset.label || '';
+                                const value = ctx.raw;
+
+                                if (label.includes('CPL')) return `${label}: ₹ ${value.toLocaleString()}`;
+                                if (label.includes('CAC')) return `${label}: ₹ ${value.toLocaleString()}`;
+                                if (label.includes('ROAS')) return `${label}: ${value.toFixed(2)}x`;
+
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    /* Bottom axis – Rupees */
+                    x1: {
+                        beginAtZero: true,
+                        position: 'bottom',
+                        ticks: {
+                            callback: v => `₹${v}`
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(255,255,255,0.05)'
+                        }
+                    },
+
+                    /* Hidden bottom axis – ROAS */
+                    x2: {
+                        beginAtZero: true,
+                        position: 'bottom',
+                        display: false,      // ← Entire axis hidden
+                        ticks: { display: false },
+                        grid: { display: false },
+                        border: { display: false }
+                    }
+                }
+            }
+        });
+
+        scalexDetailCharts.push(chart);
+        scalexChartRegistry.set(ctx.canvas, chart);
+    })();
+
+
+    /* 2) Campaign-Level ROI / Incremental ROAS – bubble chart */
+    (function () {
+        const { canvas } = createDetailCard(
+            'Campaign ROI & Incremental ROAS',
+            'Bubble size = revenue; X = ROI%, Y = spend'
+        );
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+
+        const dataPoints = campaignRoiBubbleData.map(c => ({
+            x: c.roi,
+            y: c.spendLakh,
+            r: Math.max(8, Math.sqrt(c.revenueLakh) * 3),  // bubble radius
+            _meta: c
+        }));
+
+        const chart = new Chart(ctx, {
+            type: 'bubble',
+            data: {
+                datasets: [
+                    {
+                        label: 'Campaigns',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(129, 140, 248, 0.45)',
+                        borderColor: 'rgba(129, 140, 248, 0.95)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const m = ctx.raw._meta;
+                                return [
+                                    m.name,
+                                    `Channel: ${m.channel}`,
+                                    `Spend: ₹ ${m.spendLakh.toFixed(1)}L`,
+                                    `Revenue: ₹ ${m.revenueLakh.toFixed(1)}L`,
+                                    `ROI: ${m.roi.toFixed(0)}%`,
+                                    `Incremental ROAS: +${m.incrRoas.toFixed(0)}%`
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'ROI (%)' },
+                        beginAtZero: false
+                    },
+                    y: {
+                        title: { display: true, text: 'Spend (₹L)' },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        scalexDetailCharts.push(chart);
+        scalexChartRegistry.set(ctx.canvas, chart);
+    })();
+
+    /* 3) Touch-Point Revenue Split (First / Mid / Last) */
+    (function () {
+        const { channels, first, mid, last } = touchPointSplitData;
+        const { canvas } = createDetailCard(
+            'Touch-Point Revenue Split',
+            'Share of revenue by first, mid, and last touch'
+        );
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: channels,
+                datasets: [
+                    {
+                        label: 'First Touch',
+                        data: first,
+                        backgroundColor: metaColor,
+                        borderColor: metaColor,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Mid Touch',
+                        data: mid,
+                        backgroundColor: googleColor,
+                        borderColor: googleColor,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Last Touch',
+                        data: last,
+                        backgroundColor: linkedinColor,
+                        borderColor: linkedinColor,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 20,
+                            boxHeight: 10
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(0)}%`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: v => `${v}%`
+                        }
+                    }
+                }
+            }
+        });
+
+        scalexDetailCharts.push(chart);
+        scalexChartRegistry.set(ctx.canvas, chart);
+    })();
+
+    /* 4) Audience Segment ROAS */
+    (function () {
+        const { labels, roas } = audienceRoasData;
+        const { canvas } = createDetailCard(
+            'Audience Segment ROAS',
+            'New vs Repeat vs Lookalike vs Remarketing'
+        );
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'ROAS (x)',
+                        data: roas,
+                        backgroundColor: googleColor,
+                        borderColor: googleColor,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.raw.toFixed(2)}x`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        scalexDetailCharts.push(chart);
+        scalexChartRegistry.set(ctx.canvas, chart);
+    })();
+
+
+    /* 5) Lead Quality Score by Channel */
+    (function () {
+        const { channels, scores } = leadQualityData;
+        const { canvas } = createDetailCard(
+            'Lead Quality Score by Channel',
+            '0–100 score based on CRM pipeline outcomes'
+        );
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const colors = scores.map(s => {
+            if (s >= 80) return '#22c55e';          // green
+            if (s >= 70) return '#fbbf24';          // amber
+            return '#f97373';                       // red
+        });
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: channels,
+                datasets: [
+                    {
+                        label: 'Quality Score',
+                        data: scores,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.raw.toFixed(0)}/100`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        scalexDetailCharts.push(chart);
+        scalexChartRegistry.set(ctx.canvas, chart);
+    })();
+
+
+    /* 6) Spend Efficiency Index: Spend% vs Revenue% */
+    (function () {
+        const { channels, spendShare, revenueShare } = spendEfficiencyData;
+        const { canvas } = createDetailCard(
+            'Spend Efficiency Index by Channel',
+            'Compare spend share vs revenue share'
+        );
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: channels,
+                datasets: [
+                    {
+                        label: 'Spend %',
+                        data: spendShare,
+                        backgroundColor: neutralBar,
+                        borderColor: neutralBar,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Revenue %',
+                        data: revenueShare,
+                        backgroundColor: metaColor,
+                        borderColor: metaColor,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 20,
+                            boxHeight: 10
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const label = ctx.dataset.label || '';
+                                const v = ctx.raw;
+                                return `${label}: ${v.toFixed(1)}%`;
+                            },
+                            footer: (items) => {
+                                const i = items[0].dataIndex;
+                                const spend = spendShare[i];
+                                const rev = revenueShare[i];
+                                const index = rev - spend; // revenue% − spend%
+                                const sign = index >= 0 ? '+' : '';
+                                return `Index: ${sign}${index.toFixed(1)} pts`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 60
+                    }
+                }
+            }
+        });
+
+        scalexDetailCharts.push(chart);
+        scalexChartRegistry.set(ctx.canvas, chart);
+    })();
+
+    /* 7) Creative CTR / CPC / Engagement – metric tiles (no chart) */
+    (function () {
+        const { card } = createDetailCard(
+            'Creative Performance',
+            'CTR · CPC · Engagement (last 30 days)',
+            false
+        );
+        if (!card) return;
+
+        // Wrapper for all tiles
+        const wrapper = document.createElement('div');
+        wrapper.className = 'metric-tiles-wrapper';
+
+        function makeTile(title, metric) {
+            const tile = document.createElement('div');
+            tile.className = 'metric-tile';
+
+            const titleEl = document.createElement('p');
+            titleEl.className = 'metric-tile-title';
+            titleEl.textContent = title;
+
+            const valueEl = document.createElement('p');
+            valueEl.className = 'metric-tile-value';
+            valueEl.textContent = metric.unit === '₹'
+                ? `₹ ${metric.latest.toLocaleString()}`
+                : `${metric.latest}${metric.unit}`;
+
+            const deltaEl = document.createElement('p');
+            deltaEl.className = 'metric-tile-delta';
+            const arrow = metric.direction === 'up' ? '▲' : '▼';
+            const color = metric.direction === 'up' ? 'metric-tile-delta-up' : 'metric-tile-delta-down';
+            deltaEl.classList.add(color);
+
+            const absDelta = Math.abs(metric.delta);
+            if (metric.unit === '%') {
+                deltaEl.textContent = `${arrow} ${absDelta.toFixed(1)}pp vs prev`;
+            } else {
+                deltaEl.textContent = `${arrow} ${absDelta.toFixed(0)}% vs prev`;
+            }
+
+            tile.appendChild(titleEl);
+            tile.appendChild(valueEl);
+            tile.appendChild(deltaEl);
+            return tile;
+        }
+
+        wrapper.appendChild(makeTile('CTR', creativePerformanceSummary.ctr));
+        wrapper.appendChild(makeTile('CPC', creativePerformanceSummary.cpc));
+        wrapper.appendChild(makeTile('Engagement Rate', creativePerformanceSummary.engagement));
+
+        card.appendChild(wrapper);
+    })();
+
+    /* 8) Channel Performance Snapshot – table card (no chart) */
+    (function () {
+        const { card } = createDetailCard(
+            'Channel Performance Snapshot',
+            'Spend, revenue, and efficiency metrics by channel',
+            false
+        );
+        if (!card) return;
+    
+        // Add CSV download button to card header (top-right)
+        const header = card.querySelector('.detail-card-header');
+        if (header) {
+            const downloadBtn = document.createElement('button');
+            downloadBtn.type = 'button';
+            downloadBtn.className = 'detail-card-download-btn';
+            downloadBtn.title = 'Download as CSV';
+            downloadBtn.innerHTML = '⭳';
+            downloadBtn.addEventListener('click', downloadChannelPerformanceCSV);
+            header.appendChild(downloadBtn);
+        }
+    
+        // Wrapper to allow horizontal scroll
+        const scrollWrapper = document.createElement('div');
+        scrollWrapper.className = 'channel-performance-table-wrapper';
+    
+        const table = document.createElement('table');
+        table.className = 'channel-performance-table';
+    
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th>Channel</th>
+                <th>Spend</th>
+                <th>Revenue</th>
+                <th>CPL</th>
+                <th>CAC</th>
+                <th>ROAS</th>
+                <th>ROI</th>
+                <th>Lead Q.</th>
+            </tr>
+        `;
+        table.appendChild(thead);
+    
+        const tbody = document.createElement('tbody');
+    
+        channelPerformanceTableData.forEach(row => {
+            const tr = document.createElement('tr');
+        
+            tr.innerHTML = `
+                <td>${row.channel}</td>
+                <td>₹ ${row.spend.toLocaleString()}</td>
+                <td>₹ ${row.revenue.toLocaleString()}</td>
+                <td>₹ ${row.cpl.toLocaleString()}</td>
+                <td>₹ ${row.cac.toLocaleString()}</td>
+                <td>${row.roas.toFixed(2)}x</td>
+                <td>${row.roi.toFixed(0)}%</td>
+                <td>${row.leadQuality}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    
+        table.appendChild(tbody);
+        scrollWrapper.appendChild(table);
+        card.appendChild(scrollWrapper);
+    })();
+}
+
+function downloadChannelPerformanceCSV() {
+    if (!Array.isArray(channelPerformanceTableData) || channelPerformanceTableData.length === 0) {
+        console.warn('No channel performance data to export');
+        return;
+    }
+
+    const headers = [
+        'Channel',
+        'Spend',
+        'Revenue',
+        'CPL',
+        'CAC',
+        'ROAS',
+        'ROI',
+        'LeadQuality'
+    ];
+
+    const rows = channelPerformanceTableData.map(row => [
+        row.channel,
+        row.spend,
+        row.revenue,
+        row.cpl,
+        row.cac,
+        row.roas,
+        row.roi,
+        row.leadQuality
+    ]);
+
+    const csvLines = [];
+
+    // Header row
+    csvLines.push(headers.join(','));
+
+    // Data rows with basic CSV escaping
+    rows.forEach(row => {
+        const line = row.map(value => {
+            if (value == null) return '';
+            const str = String(value);
+            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                return '"' + str.replace(/"/g, '""') + '"';
+            }
+            return str;
+        }).join(',');
+        csvLines.push(line);
+    });
+
+    const csvContent = csvLines.join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'channel_performance_snapshot.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
 }

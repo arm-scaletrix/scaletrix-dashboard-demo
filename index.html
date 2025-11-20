@@ -40,7 +40,9 @@
         <div class="header-inner">
             <!-- Left: Brand -->
             <div class="flex items-center space-x-3">
-                <img src="./static/scaletrix-logo.png" alt="Scaletrix.ai Logo" class="logo-img">
+                <a href="./index.html">
+                    <img src="./static/scaletrix-logo.png" alt="Scaletrix.ai Logo" class="logo-img">
+                </a>
             </div>
 
             <!-- Right: app_id + logout -->
@@ -60,7 +62,7 @@
                     <strong style="font-size: 0.9rem;">{{client_id}}</strong>
                 </span>
 
-                <button class="logout-button" onclick="location.href='/login'">
+                <button class="logout-button" onclick="location.href='./login.html'">
                     <i data-lucide="power" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -71,7 +73,7 @@
         <!-- MAIN LAYOUT (centered, max width) -->
         <div class="layout-container">
             <!-- SIDEBAR (full-height column) -->
-            <aside class="sidebar">
+            <aside class="sidebar box-shadow-cust">
                 <nav>
                     <ul class="space-y-3 pt-4">
                         <li class="sidebar-link active">
@@ -190,6 +192,68 @@
 
                 </div>
 
+                <!-- SMART ALERTS -->
+                <div id="smart-alerts" class="smart-alerts">
+                    <h3 class="smart-alerts-title">Smart Alerts</h3>
+                    <!-- Optional description text -->
+                    <!-- <p class="smart-alerts-subtitle">
+                        Preview of the Smart Insights &amp; Alerts panel. Values below are sample placeholders to
+                        demonstrate the type of intelligence this section will show.
+                    </p> -->
+
+                    <div class="smart-alerts-grid">
+
+                        <!-- Performance Gain -->
+                        <div class="alert-card alert-card--performance">
+                            <div>
+                                <p class="alert-text-label">Performance Gain</p>
+                                <p class="alert-text-main">
+                                    ROAS up <span class="alert-highlight-green">18% MoM</span>
+                                </p>
+                                <p class="alert-text-sub">
+                                    Driven by higher CRM match rate.
+                                </p>
+                            </div>
+                            <div class="alert-symbol alert-symbol--green">
+                                ▲
+                            </div>
+                        </div>
+
+                        <!-- Data Quality Alert -->
+                        <div class="alert-card alert-card--data-quality">
+                            <div>
+                                <p class="alert-text-label">Data Quality Alert</p>
+                                <p class="alert-text-main">
+                                    Event recovery <span class="alert-highlight-red">down 12%</span>
+                                </p>
+                                <p class="alert-text-sub">
+                                    Check Meta pixel sync &amp; CRM webhook.
+                                </p>
+                            </div>
+                            <div class="alert-symbol alert-symbol--amber">
+                                ⚠
+                            </div>
+                        </div>
+
+                        <!-- Attribution Insight -->
+                        <div class="alert-card alert-card--attribution">
+                            <div>
+                                <p class="alert-text-label">Attribution Insight</p>
+                                <p class="alert-text-main">
+                                    Google Ads drives <span class="alert-highlight-sky">42% of conversions</span>
+                                </p>
+                                <p class="alert-text-sub">
+                                    Majority from 2-touch journeys with Meta assist.
+                                </p>
+                            </div>
+                            <div class="alert-symbol alert-symbol--sky">
+                                ★
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
                 <!-- DETAIL BLOCK -->
                 <div id="detail-section" class="mt-4 rounded-lg shadow-lg p-6 box-shadow-cust">
                     <h3 class="text-xl font-semibold mb-4">Detailed View</h3>
@@ -203,22 +267,8 @@
                     </div>
                 </div>
 
-                <!-- SMART ALERTS -->
-                <div id="smart-alerts" class="mt-4 bg-gray-900/80 rounded-lg shadow-lg p-6 box-shadow-cust">
-                    <h3 class="text-xl font-semibold mb-4">Smart Alerts</h3>
-                    <p class="text-gray-300 mb-4 text-sm">
-                        Note: This section will be shown a Smart Insights and Alerts panel (Smart Alerts, ROAS <strong
-                            style="color: rgb(214, 160, 10);" class="font-bold text-lg">↑</strong>18% MoM, Event
-                        Recovery
-                        <strong style="color: red;" class="font-bold text-lg">↓</strong>12%, etc.).
-                    </p>
-                    <!-- JS will append alert rows / badges here -->
-                    <!-- Example structure (for later):
-                <div class="flex justify-between items-center">
-                    <span>ROAS dropped below target on Meta Prospecting</span>
-                    <span class="text-red-400 text-sm font-semibold">High</span>
-                </div> -->
-                </div>
+
+
             </main>
         </div>
         <footer id="main-footer">
