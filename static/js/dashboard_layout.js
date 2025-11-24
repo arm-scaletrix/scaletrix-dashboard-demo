@@ -1,3 +1,68 @@
+/*------------- Global Palette (one place to change everything) -------------*/
+
+const SCALEX_COLORS = {
+    // Brand / channel colors (use these everywhere for Meta / Google / LinkedIn)
+    /* meta:        '#ffce56', // Light Yellow
+    google:         '#cc65fe', // Light Purple (French Lilac)
+    linkedin:       '#4ade80', // green */
+
+    meta:           '#A78BFA', // Soft Violet
+    google:         '#38BDF8', // Sky Blue
+    linkedin:       '#34D399', // Emerald
+
+    // KPI / metric accents
+    kpiRevenue:     '#22C55E', // Revenue sparkline, "good" trend
+    kpiSpend:       '#6366F1', // Spend sparkline
+    kpiRoas:        '#FBBF24', // ROAS sparkline, warm highlight
+    kpiRoi:         '#EC4899', // ROI sparkline, pink accent
+    kpiRevenueFill: 'rgba(34,197,94,0.12)',
+    kpiSpendFill:   'rgba(99,102,241,0.16)',
+    kpiRoasFill:    'rgba(251,191,36,0.16)',
+    kpiRoiFill:     'rgba(236,72,153,0.18)',
+
+    // Neutral / helpers
+    neutralBar:     '#9CA3AF', // Grey bars (Spend %, baseline, etc.)
+    neutralAxis:    '#64748B', // Axis lines / text if needed
+    tableBorder:    '#1F2937',
+
+    // Traffic-light for quality / status
+    good:           '#22C55E',
+    warning:        '#FBBF24',
+    bad:            '#F97373',
+
+    // Bubble chart / special
+    bubbleFill:     'rgba(129, 140, 248, 0.45)', // Indigo fill
+    bubbleStroke:   'rgba(129, 140, 248, 0.95)', // Indigo border
+};
+
+/* ---------------------------------------------------------------- */
+/* 
+Performance Overview page
+    Funnel: SCALEX_COLORS.meta, .google, .linkedin
+    Blended vs Paid CAC: SCALEX_COLORS.meta, .google
+    CAC Trend by Channel: SCALEX_COLORS.meta, .google, .linkedin
+    Paid Campaign ROI by Stage: SCALEX_COLORS.meta, .google, .linkedin
+    Pipeline Value: SCALEX_COLORS.meta
+    LTV by Cohort: SCALEX_COLORS.google
+    Attribution Accuracy: baseline → SCALEX_COLORS.meta, actual → SCALEX_COLORS.google
+    Top Channels by ROAS: SCALEX_COLORS.linkedin
+    New vs Repeat Mix: new → SCALEX_COLORS.meta, repeat → SCALEX_COLORS.google
+    KPI Sparklines:
+        Revenue → SCALEX_COLORS.kpiRevenue
+        Spend → SCALEX_COLORS.kpiSpend
+        ROAS → SCALEX_COLORS.kpiRoas
+        ROI → SCALEX_COLORS.kpiRoi
+
+Channel & Campaign Analytics page
+    Channel-wise CPL/CAC/ROAS: SCALEX_COLORS.meta / .google / .linkedin
+    Campaign ROI Bubble: SCALEX_COLORS.bubbleFill / .bubbleStroke
+    Touch-Point Split: SCALEX_COLORS.meta / .google / .linkedin
+    Audience Segment ROAS: SCALEX_COLORS.google
+    Lead Quality Score: SCALEX_COLORS.good / .warning / .bad
+    Spend Efficiency Index: SCALEX_COLORS.neutralBar & .meta
+*/
+/* ---------------------------------------------------------------- */
+
 /* Dashboard Layout Logic
  * - Sidebar tab active state
  * - Sync heading with selected tab
@@ -375,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function () {
         applyChange(changeEl, pct);
 
         const ctx = document.getElementById('rev-chart').getContext('2d');
-        createSparkline(ctx, current.slice(0, today), '#22c55e', 'rgba(34,197,94,0.12)');
+        createSparkline(ctx, current.slice(0, today), SCALEX_COLORS.kpiRevenue, SCALEX_COLORS.kpiRevenueFill);
       }
 
       // ------- Spend -------
@@ -393,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function () {
         applyChange(changeEl, pct, true); // for spend, up might be "worse" depending on your logic
         // Here I'm treating higher spend as "up = red", adjust as you like.
         const ctx = document.getElementById('spend-chart').getContext('2d');
-        createSparkline(ctx, current.slice(0, today), '#6366f1', 'rgba(99,102,241,0.16)');
+        createSparkline(ctx, current.slice(0, today), SCALEX_COLORS.kpiSpend, SCALEX_COLORS.kpiSpendFill);
       }
 
       // ------- ROAS -------
@@ -411,7 +476,7 @@ document.addEventListener('DOMContentLoaded', function () {
         applyChange(changeEl, pct);
 
         const ctx = document.getElementById('roas-chart').getContext('2d');
-        createSparkline(ctx, current.slice(0, today), '#fbbf24', 'rgba(251,191,36,0.16)');
+        createSparkline(ctx, current.slice(0, today), SCALEX_COLORS.kpiRoas, SCALEX_COLORS.kpiRoasFill);
       }
 
       // ------- ROI -------
@@ -429,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function () {
         applyChange(changeEl, pct);
 
         const ctx = document.getElementById('roi-chart').getContext('2d');
-        createSparkline(ctx, current.slice(0, today), '#ec4899', 'rgba(236,72,153,0.18)');
+        createSparkline(ctx, current.slice(0, today), SCALEX_COLORS.kpiRoi, SCALEX_COLORS.kpiRoiFill);
       }
     }
 
@@ -862,259 +927,260 @@ function renderPerformanceOverviewDetails() {
         return;
     }
 
-	const metaColor = '#ffce56';   // Light Yellow
+	/* const metaColor = '#ffce56';   // Light Yellow
 	const googleColor = '#cc65fe'; // Light Purple (French Lilac)
-    const linkedinColor = '#4ade80';// green
+    const linkedinColor = '#4ade80';// green */
 
-	// const metaColor = '#ff6384';   // Light Red
-	// const googleColor = '#9bd0f5'; // Light Blue
+    const metaColor = SCALEX_COLORS.meta;
+    const googleColor = SCALEX_COLORS.google;
+    const linkedinColor = SCALEX_COLORS.linkedin;
 
     // 1) Funnel – Spend → Revenue → ROI → ROAS (Meta vs Google vs LinkedIn)
-(function () {
-    const meta = funnelData.meta;
-    const google = funnelData.google;
-    const linkedin = funnelData.linkedin;
-
-    const stages = ['Spend', 'Revenue', 'ROI', 'ROAS'];
-
-    // Build lookup by stage
-    const metaByStage = meta.reduce((acc, d) => {
-        acc[d.stage] = d.value;
-        return acc;
-    }, {});
-    const googleByStage = google.reduce((acc, d) => {
-        acc[d.stage] = d.value;
-        return acc;
-    }, {});
-    const linkedinByStage = linkedin.reduce((acc, d) => {
-        acc[d.stage] = d.value;
-        return acc;
-    }, {});
-
-    // Money axis: only Spend + Revenue
-    const metaMoney = stages.map(stage =>
-        (stage === 'Spend' || stage === 'Revenue') ? metaByStage[stage] ?? null : null
-    );
-    const googleMoney = stages.map(stage =>
-        (stage === 'Spend' || stage === 'Revenue') ? googleByStage[stage] ?? null : null
-    );
-    const linkedinMoney = stages.map(stage =>
-        (stage === 'Spend' || stage === 'Revenue') ? linkedinByStage[stage] ?? null : null
-    );
-
-    // Percent axis: ROI + ROAS (store as percent, not ratio)
-    const metaRatio = stages.map(stage => {
-        if (stage === 'ROI' || stage === 'ROAS') {
-            const v = metaByStage[stage];
-            return v != null ? v * 100 : null; // 2.7 -> 270
-        }
-        return null;
-    });
-
-    const googleRatio = stages.map(stage => {
-        if (stage === 'ROI' || stage === 'ROAS') {
-            const v = googleByStage[stage];
-            return v != null ? v * 100 : null; // 3.7 -> 370
-        }
-        return null;
-    });
-
-    const linkedinRatio = stages.map(stage => {
-        if (stage === 'ROI' || stage === 'ROAS') {
-            const v = linkedinByStage[stage];
-            return v != null ? v * 100 : null;
-        }
-        return null;
-    });
-
-    const { canvas } = createDetailCard(
-        'Spend → Revenue → ROI → ROAS',
-        'Comparison of Meta, Google & LinkedIn funnel performance'
-    );
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-
-    const chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: stages,
-            datasets: [
-                // Money (₹) – left axis
-                {
-                    label: 'Meta',
-                    data: metaMoney,
-                    yAxisID: 'y',
-                    backgroundColor: metaColor,
-                    borderColor: metaColor,
-                    borderWidth: 1,
-                    bar: 0.9,
-                    categoryPercentage: 0.9
-                },
-                {
-                    label: 'Google',
-                    data: googleMoney,
-                    yAxisID: 'y',
-                    backgroundColor: googleColor,
-                    borderColor: googleColor,
-                    borderWidth: 1,
-                    bar: 0.9,
-                    categoryPercentage: 0.9
-                },
-                {
-                    label: 'LinkedIn',
-                    data: linkedinMoney,
-                    yAxisID: 'y',
-                    backgroundColor: linkedinColor,
-                    borderColor: linkedinColor,
-                    borderWidth: 1,
-                    bar: 0.9,
-                    categoryPercentage: 0.9
-                },
-
-                // Ratios (%) – right axis (hidden from legend)
-                {
-                    label: 'Meta (ratio)',
-                    data: metaRatio,
-                    yAxisID: 'y1',
-                    backgroundColor: metaColor,
-                    borderColor: metaColor,
-                    borderWidth: 1,
-                    bar: 0.9,
-                    categoryPercentage: 0.9
-                },
-                {
-                    label: 'Google (ratio)',
-                    data: googleRatio,
-                    yAxisID: 'y1',
-                    backgroundColor: googleColor,
-                    borderColor: googleColor,
-                    borderWidth: 1,
-                    bar: 0.9,
-                    categoryPercentage: 0.9
-                },
-                {
-                    label: 'LinkedIn (ratio)',
-                    data: linkedinRatio,
-                    yAxisID: 'y1',
-                    backgroundColor: linkedinColor,
-                    borderColor: linkedinColor,
-                    borderWidth: 1,
-                    bar: 0.9,
-                    categoryPercentage: 0.9
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    labels: {
-                        // Hide the "(ratio)" datasets from the legend
-                        filter: function (item) {
-                            return !item.text.includes('(ratio)');
-                        },
-                        usePointStyle: true,
-                        pointStyle: 'rectRounded',
-                        boxWidth: 20,
-                        boxHeight: 10
+    (function () {
+        const meta = funnelData.meta;
+        const google = funnelData.google;
+        const linkedin = funnelData.linkedin;
+    
+        const stages = ['Spend', 'Revenue', 'ROI', 'ROAS'];
+    
+        // Build lookup by stage
+        const metaByStage = meta.reduce((acc, d) => {
+            acc[d.stage] = d.value;
+            return acc;
+        }, {});
+        const googleByStage = google.reduce((acc, d) => {
+            acc[d.stage] = d.value;
+            return acc;
+        }, {});
+        const linkedinByStage = linkedin.reduce((acc, d) => {
+            acc[d.stage] = d.value;
+            return acc;
+        }, {});
+    
+        // Money axis: only Spend + Revenue
+        const metaMoney = stages.map(stage =>
+            (stage === 'Spend' || stage === 'Revenue') ? metaByStage[stage] ?? null : null
+        );
+        const googleMoney = stages.map(stage =>
+            (stage === 'Spend' || stage === 'Revenue') ? googleByStage[stage] ?? null : null
+        );
+        const linkedinMoney = stages.map(stage =>
+            (stage === 'Spend' || stage === 'Revenue') ? linkedinByStage[stage] ?? null : null
+        );
+    
+        // Percent axis: ROI + ROAS (store as percent, not ratio)
+        const metaRatio = stages.map(stage => {
+            if (stage === 'ROI' || stage === 'ROAS') {
+                const v = metaByStage[stage];
+                return v != null ? v * 100 : null; // 2.7 -> 270
+            }
+            return null;
+        });
+    
+        const googleRatio = stages.map(stage => {
+            if (stage === 'ROI' || stage === 'ROAS') {
+                const v = googleByStage[stage];
+                return v != null ? v * 100 : null; // 3.7 -> 370
+            }
+            return null;
+        });
+    
+        const linkedinRatio = stages.map(stage => {
+            if (stage === 'ROI' || stage === 'ROAS') {
+                const v = linkedinByStage[stage];
+                return v != null ? v * 100 : null;
+            }
+            return null;
+        });
+    
+        const { canvas } = createDetailCard(
+            'Spend → Revenue → ROI → ROAS',
+            'Comparison of Meta, Google & LinkedIn funnel performance'
+        );
+        if (!canvas) return;
+    
+        const ctx = canvas.getContext('2d');
+    
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: stages,
+                datasets: [
+                    // Money (₹) – left axis
+                    {
+                        label: 'Meta',
+                        data: metaMoney,
+                        yAxisID: 'y',
+                        backgroundColor:  SCALEX_COLORS.meta,
+                        borderColor:  SCALEX_COLORS.meta,
+                        borderWidth: 1,
+                        bar: 0.9,
+                        categoryPercentage: 0.9
                     },
-                    // Sync ratio datasets with legend clicks
-                    onClick: function (e, legendItem, legend) {
-                        const chart = legend.chart;
-                        const index = legendItem.datasetIndex;
-
-                        // dataset 0 -> Meta (money), link to index 3 (Meta ratio)
-                        // dataset 1 -> Google (money), link to index 4 (Google ratio)
-                        // dataset 2 -> LinkedIn (money), link to index 5 (LinkedIn ratio)
-                        let ratioIndex = null;
-                        if (index === 0) ratioIndex = 3;
-                        if (index === 1) ratioIndex = 4;
-                        if (index === 2) ratioIndex = 5;
-
-                        const currentlyVisible = chart.isDatasetVisible(index);
-                        chart.setDatasetVisibility(index, !currentlyVisible);
-
-                        if (ratioIndex !== null) {
-                            chart.setDatasetVisibility(ratioIndex, !currentlyVisible);
-                        }
-
-                        chart.update();
+                    {
+                        label: 'Google',
+                        data: googleMoney,
+                        yAxisID: 'y',
+                        backgroundColor:  SCALEX_COLORS.google,
+                        borderColor:  SCALEX_COLORS.google,
+                        borderWidth: 1,
+                        bar: 0.9,
+                        categoryPercentage: 0.9
+                    },
+                    {
+                        label: 'LinkedIn',
+                        data: linkedinMoney,
+                        yAxisID: 'y',
+                        backgroundColor:  SCALEX_COLORS.linkedin,
+                        borderColor:  SCALEX_COLORS.linkedin,
+                        borderWidth: 1,
+                        bar: 0.9,
+                        categoryPercentage: 0.9
+                    },
+                
+                    // Ratios (%) – right axis (hidden from legend)
+                    {
+                        label: 'Meta (ratio)',
+                        data: metaRatio,
+                        yAxisID: 'y1',
+                        backgroundColor:  SCALEX_COLORS.meta,
+                        borderColor:  SCALEX_COLORS.meta,
+                        borderWidth: 1,
+                        bar: 0.9,
+                        categoryPercentage: 0.9
+                    },
+                    {
+                        label: 'Google (ratio)',
+                        data: googleRatio,
+                        yAxisID: 'y1',
+                        backgroundColor:  SCALEX_COLORS.google,
+                        borderColor:  SCALEX_COLORS.google,
+                        borderWidth: 1,
+                        bar: 0.9,
+                        categoryPercentage: 0.9
+                    },
+                    {
+                        label: 'LinkedIn (ratio)',
+                        data: linkedinRatio,
+                        yAxisID: 'y1',
+                        backgroundColor:  SCALEX_COLORS.linkedin,
+                        borderColor:  SCALEX_COLORS.linkedin,
+                        borderWidth: 1,
+                        bar: 0.9,
+                        categoryPercentage: 0.9
                     }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function (ctx) {
-                            const stage = ctx.label;
-                            const raw = ctx.raw;
-                            if (raw == null) return '';
-
-                            const baseLabel = ctx.dataset.label.replace(' (ratio)', '');
-
-                            if (stage === 'Spend' || stage === 'Revenue') {
-                                return `${baseLabel}: ₹ ${raw.toLocaleString()}`;
-                            }
-                            if (stage === 'ROI') {
-                                // raw is percent
-                                return `${baseLabel}: ${raw.toFixed(1)}%`;
-                            }
-                            if (stage === 'ROAS') {
-                                // raw is percent, convert back to x
-                                const xVal = raw / 100;
-                                return `${baseLabel}: ${xVal.toFixed(2)}x`;
-                            }
-                            return `${baseLabel}: ${raw}`;
-                        }
-                    }
-                }
+                ]
             },
-            scales: {
-                x: {
-                    stacked: true
-                },
-                // Money axis (left)
-                y: {
-                    position: 'left',
-                    stacked: true,
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function (value) {
-                            if (value >= 10000000) {
-                                return `₹${(value / 10000000).toFixed(1)}Cr`;
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            // Hide the "(ratio)" datasets from the legend
+                            filter: function (item) {
+                                return !item.text.includes('(ratio)');
+                            },
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 20,
+                            boxHeight: 10
+                        },
+                        // Sync ratio datasets with legend clicks
+                        onClick: function (e, legendItem, legend) {
+                            const chart = legend.chart;
+                            const index = legendItem.datasetIndex;
+                        
+                            // dataset 0 -> Meta (money), link to index 3 (Meta ratio)
+                            // dataset 1 -> Google (money), link to index 4 (Google ratio)
+                            // dataset 2 -> LinkedIn (money), link to index 5 (LinkedIn ratio)
+                            let ratioIndex = null;
+                            if (index === 0) ratioIndex = 3;
+                            if (index === 1) ratioIndex = 4;
+                            if (index === 2) ratioIndex = 5;
+                        
+                            const currentlyVisible = chart.isDatasetVisible(index);
+                            chart.setDatasetVisibility(index, !currentlyVisible);
+                        
+                            if (ratioIndex !== null) {
+                                chart.setDatasetVisibility(ratioIndex, !currentlyVisible);
                             }
-                            if (value >= 100000) {
-                                return `₹${(value / 100000).toFixed(1)}L`;
+                        
+                            chart.update();
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                const stage = ctx.label;
+                                const raw = ctx.raw;
+                                if (raw == null) return '';
+                            
+                                const baseLabel = ctx.dataset.label.replace(' (ratio)', '');
+                            
+                                if (stage === 'Spend' || stage === 'Revenue') {
+                                    return `${baseLabel}: ₹ ${raw.toLocaleString()}`;
+                                }
+                                if (stage === 'ROI') {
+                                    // raw is percent
+                                    return `${baseLabel}: ${raw.toFixed(1)}%`;
+                                }
+                                if (stage === 'ROAS') {
+                                    // raw is percent, convert back to x
+                                    const xVal = raw / 100;
+                                    return `${baseLabel}: ${xVal.toFixed(2)}x`;
+                                }
+                                return `${baseLabel}: ${raw}`;
                             }
-                            if (value >= 1000) {
-                                return `₹${(value / 1000).toFixed(1)}k`;
-                            }
-                            return `₹${value}`;
                         }
                     }
                 },
-                // Percentage axis (right) for ROI & ROAS
-                y1: {
-                    position: 'right',
-                    stacked: true,
-                    beginAtZero: true,
-                    grid: {
-                        drawOnChartArea: false
+                scales: {
+                    x: {
+                        stacked: true
                     },
-                    ticks: {
-                        callback: function (value) {
-                            return `${value}%`;
+                    // Money axis (left)
+                    y: {
+                        position: 'left',
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                if (value >= 10000000) {
+                                    return `₹${(value / 10000000).toFixed(1)}Cr`;
+                                }
+                                if (value >= 100000) {
+                                    return `₹${(value / 100000).toFixed(1)}L`;
+                                }
+                                if (value >= 1000) {
+                                    return `₹${(value / 1000).toFixed(1)}k`;
+                                }
+                                return `₹${value}`;
+                            }
+                        }
+                    },
+                    // Percentage axis (right) for ROI & ROAS
+                    y1: {
+                        position: 'right',
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: {
+                            drawOnChartArea: false
+                        },
+                        ticks: {
+                            callback: function (value) {
+                                return `${value}%`;
+                            }
                         }
                     }
                 }
             }
-        }
-    });
-
-    scalexDetailCharts.push(chart);
-    scalexChartRegistry.set(ctx.canvas, chart);
-})();
+        });
+    
+        scalexDetailCharts.push(chart);
+        scalexChartRegistry.set(ctx.canvas, chart);
+    })();
 
     // 2) Blended CAC vs Paid CAC – trend lines
     (function () {
@@ -1137,16 +1203,16 @@ function renderPerformanceOverviewDetails() {
                         tension: 0.2,
                         fill: false,
 						borderWidth: 2,
-						borderColor: metaColor,
-						backgroundColor: metaColor,
+						borderColor:  SCALEX_COLORS.meta,
+						backgroundColor:  SCALEX_COLORS.meta,
                     },
                     {
                         label: 'Paid CAC',
                         data: paidCAC,
                         tension: 0.2,
                         fill: false,
-						borderColor: googleColor,
-						backgroundColor: googleColor,
+						borderColor:  SCALEX_COLORS.google,
+						backgroundColor:  SCALEX_COLORS.google,
 						borderWidth: 2
                     }
                 ]
@@ -1207,8 +1273,8 @@ function renderPerformanceOverviewDetails() {
                         tension: 0.2,
                         fill: false,
                         borderWidth: 2,
-                        borderColor: metaColor,
-                        backgroundColor: metaColor
+                        borderColor:  SCALEX_COLORS.meta,
+                        backgroundColor:  SCALEX_COLORS.meta
                     },
                     {
                         label: 'Google CAC',
@@ -1216,8 +1282,8 @@ function renderPerformanceOverviewDetails() {
                         tension: 0.2,
                         fill: false,
                         borderWidth: 2,
-                        borderColor: googleColor,
-                        backgroundColor: googleColor
+                        borderColor:  SCALEX_COLORS.google,
+                        backgroundColor:  SCALEX_COLORS.google
                     },
                     {
                         label: 'LinkedIn CAC',
@@ -1225,8 +1291,8 @@ function renderPerformanceOverviewDetails() {
                         tension: 0.2,
                         fill: false,
                         borderWidth: 2,
-                        borderColor: linkedinColor,
-                        backgroundColor: linkedinColor
+                        borderColor:  SCALEX_COLORS.linkedin,
+                        backgroundColor:  SCALEX_COLORS.linkedin
                     }
                 ]
             },
@@ -1283,22 +1349,22 @@ function renderPerformanceOverviewDetails() {
                     { 
                         label: 'Meta',
                         data: metaRoiPercent,
-                        backgroundColor: metaColor,
-                        borderColor: metaColor,
+                        backgroundColor:  SCALEX_COLORS.meta,
+                        borderColor:  SCALEX_COLORS.meta,
                         borderWidth: 1
                     },
                     { 
                         label: 'Google',
                         data: googleRoiPercent,
-                        backgroundColor: googleColor,
-                        borderColor: googleColor,
+                        backgroundColor:  SCALEX_COLORS.google,
+                        borderColor:  SCALEX_COLORS.google,
                         borderWidth: 1
                     },
                     { 
                         label: 'LinkedIn',
                         data: linkedinRoiPercent,
-                        backgroundColor: linkedinColor,
-                        borderColor: linkedinColor,
+                        backgroundColor:  SCALEX_COLORS.linkedin,
+                        borderColor:  SCALEX_COLORS.linkedin,
                         borderWidth: 1
                     }
                 ],
@@ -1356,8 +1422,8 @@ function renderPerformanceOverviewDetails() {
 						label: 'Pipeline (₹)', 
 						data: pipelineValue, 
 						borderWidth: 1,
-						borderColor: googleColor,
-						backgroundColor: googleColor,
+						borderColor:  SCALEX_COLORS.meta,
+						backgroundColor:  SCALEX_COLORS.meta,
 					}
                 ]
             },
@@ -1441,8 +1507,8 @@ function renderPerformanceOverviewDetails() {
 						label: 'Avg LTV (₹)', 
 						data: avgLtv, 
 						borderWidth: 1,
-						borderColor: googleColor,
-						backgroundColor: googleColor,
+						borderColor:  SCALEX_COLORS.google,
+						backgroundColor:  SCALEX_COLORS.google,
 					}
                 ]
             },
@@ -1493,8 +1559,8 @@ function renderPerformanceOverviewDetails() {
                         tension: 0,
                         borderWidth: 1,
                         fill: false,
-						backgroundColor: metaColor,
-						borderColor: metaColor
+						backgroundColor:  SCALEX_COLORS.meta,
+						borderColor:  SCALEX_COLORS.meta
                     },
                     {
                         label: 'Actual',
@@ -1502,8 +1568,8 @@ function renderPerformanceOverviewDetails() {
                         tension: 0.3,
                         borderWidth: 2,
                         fill: false,
-						backgroundColor: googleColor,
-						borderColor: googleColor
+						backgroundColor:  SCALEX_COLORS.linkedin,
+						borderColor:  SCALEX_COLORS.linkedin
                     }
                 ]
             },
@@ -1559,8 +1625,8 @@ function renderPerformanceOverviewDetails() {
 						label: 'ROAS (x)', 
 						data: roas, 
 						borderWidth: 1,
-						backgroundColor: googleColor,
-						borderColor: googleColor
+						backgroundColor:  SCALEX_COLORS.linkedin,
+						borderColor:  SCALEX_COLORS.linkedin
 					}
                 ]
             },
@@ -1607,12 +1673,12 @@ function renderPerformanceOverviewDetails() {
                     {
                         label: 'New Customers',
                         data: newPct,
-                        backgroundColor: metaColor
+                        backgroundColor:  SCALEX_COLORS.meta
                     },
                     {
                         label: 'Repeat Customers',
                         data: repeatPct,
-                        backgroundColor: googleColor
+                        backgroundColor:  SCALEX_COLORS.linkedin
                     }
                 ]
             },
@@ -1809,12 +1875,6 @@ function renderChannelCampaignDetails() {
         return;
     }
 
-    // Reuse a consistent palette
-    const metaColor = '#ffce56';    // yellow
-    const googleColor = '#cc65fe';  // purple
-    const linkedinColor = '#4ade80';// green
-    const neutralBar = '#9ca3af';   // gray for helper bars
-
     /* 1) Channel-wise CPL · CAC · ROAS */
     (function () {
         const { channels, cpl, cac, roas } = channelEfficiencyData;
@@ -1834,19 +1894,19 @@ function renderChannelCampaignDetails() {
                     {
                         label: 'CPL (₹)',
                         data: cpl,
-                        backgroundColor: metaColor,
+                        backgroundColor:  SCALEX_COLORS.meta,
                         xAxisID: 'x1',
                     },
                     {
                         label: 'CAC (₹)',
                         data: cac,
-                        backgroundColor: googleColor,
+                        backgroundColor:  SCALEX_COLORS.google,
                         xAxisID: 'x1',
                     },
                     {
                         label: 'ROAS (x)',
                         data: roas,
-                        backgroundColor: linkedinColor,
+                        backgroundColor:  SCALEX_COLORS.linkedin,
                         xAxisID: 'x2',     // ← ROAS uses hidden secondary axis
                     }
                 ]
@@ -1938,8 +1998,8 @@ function renderChannelCampaignDetails() {
                     {
                         label: 'Campaigns',
                         data: dataPoints,
-                        backgroundColor: 'rgba(129, 140, 248, 0.45)',
-                        borderColor: 'rgba(129, 140, 248, 0.95)',
+                        backgroundColor: SCALEX_COLORS.bubbleFill,
+                        borderColor: SCALEX_COLORS.bubbleStroke,
                         borderWidth: 1
                     }
                 ]
@@ -2000,22 +2060,22 @@ function renderChannelCampaignDetails() {
                     {
                         label: 'First Touch',
                         data: first,
-                        backgroundColor: metaColor,
-                        borderColor: metaColor,
+                        backgroundColor:  SCALEX_COLORS.meta,
+                        borderColor:  SCALEX_COLORS.meta,
                         borderWidth: 1
                     },
                     {
                         label: 'Mid Touch',
                         data: mid,
-                        backgroundColor: googleColor,
-                        borderColor: googleColor,
+                        backgroundColor:  SCALEX_COLORS.google,
+                        borderColor:  SCALEX_COLORS.google,
                         borderWidth: 1
                     },
                     {
                         label: 'Last Touch',
                         data: last,
-                        backgroundColor: linkedinColor,
-                        borderColor: linkedinColor,
+                        backgroundColor:  SCALEX_COLORS.linkedin,
+                        borderColor:  SCALEX_COLORS.linkedin,
                         borderWidth: 1
                     }
                 ]
@@ -2077,8 +2137,8 @@ function renderChannelCampaignDetails() {
                     {
                         label: 'ROAS (x)',
                         data: roas,
-                        backgroundColor: googleColor,
-                        borderColor: googleColor,
+                        backgroundColor:  SCALEX_COLORS.google,
+                        borderColor:  SCALEX_COLORS.google,
                         borderWidth: 1
                     }
                 ]
@@ -2118,10 +2178,11 @@ function renderChannelCampaignDetails() {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
+
         const colors = scores.map(s => {
-            if (s >= 80) return '#22c55e';          // green
-            if (s >= 70) return '#fbbf24';          // amber
-            return '#f97373';                       // red
+            if (s >= 80) return SCALEX_COLORS.good;      // Good
+            if (s >= 70) return SCALEX_COLORS.warning;   // Warning
+            return SCALEX_COLORS.bad;                    // Bad
         });
 
         const chart = new Chart(ctx, {
@@ -2129,27 +2190,54 @@ function renderChannelCampaignDetails() {
             data: {
                 labels: channels,
                 datasets: [
+                    // --- Dummy datasets ONLY for legend ---
                     {
-                        label: 'Quality Score',
+                        label: 'Warning (70–79)',
+                        backgroundColor: SCALEX_COLORS.warning,
+                        borderColor: SCALEX_COLORS.warning,
+                        barThickness: 1,
+                    },
+                    {
+                        label: 'Good (80–100)',
                         data: scores,
                         backgroundColor: colors,
                         borderColor: colors,
-                        borderWidth: 1
-                    }
+                        borderWidth: 1,
+                        barThickness: 30
+                    },
+                    {
+                        label: 'Bad (0–69)',
+                        backgroundColor: SCALEX_COLORS.bad,
+                        borderColor: SCALEX_COLORS.bad,
+                        barThickness: 1
+                    },
+                
                 ]
             },
             options: {
                 indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
+
                 plugins: {
-                    legend: { display: false },
+                    // 🔥 Custom Legend (Good / Warning / Bad)
+                    legend: {
+                        display: true,
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 20,
+                            boxHeight: 10,
+                        }
+                    },
+
                     tooltip: {
                         callbacks: {
                             label: (ctx) => `${ctx.raw.toFixed(0)}/100`
                         }
                     }
                 },
+
                 scales: {
                     x: {
                         beginAtZero: true,
@@ -2182,15 +2270,15 @@ function renderChannelCampaignDetails() {
                     {
                         label: 'Spend %',
                         data: spendShare,
-                        backgroundColor: neutralBar,
-                        borderColor: neutralBar,
+                        backgroundColor: SCALEX_COLORS.neutralBar,
+                        borderColor: SCALEX_COLORS.neutralBar,
                         borderWidth: 1
                     },
                     {
                         label: 'Revenue %',
                         data: revenueShare,
-                        backgroundColor: metaColor,
-                        borderColor: metaColor,
+                        backgroundColor:  SCALEX_COLORS.meta,
+                        borderColor:  SCALEX_COLORS.meta,
                         borderWidth: 1
                     }
                 ]
