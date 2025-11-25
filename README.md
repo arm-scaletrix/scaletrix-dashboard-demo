@@ -125,6 +125,7 @@ Contains **8 analytics modules**, such as:
 `│`  
 `├── index.html                  # Login page`  
 `├── dashboard.html              # Main dashboard`  
+`├── register.html               # Register page`  
 `│`  
 `├── static/`  
 `│  ├── css/`  
@@ -136,7 +137,7 @@ Contains **8 analytics modules**, such as:
 `│  │`  
 `│  ├── img/                    # Logos / Icons`  
 `│`  
-`└── README.md                   # You will paste this document here`
+`└── README.md                  # Will paste this document here`
 
 ---
 
@@ -176,6 +177,7 @@ API endpoints expected:
 `GET /api/performance-overview`  
 `GET /api/channel-analytics`  
 `GET /api/smart-alerts`  
+
 ---
 
 # **📘 Summary**
@@ -204,7 +206,7 @@ Below is the **complete data specification** for every element on the dashboard.
 
 ## **1️⃣ KPI Cards (Top Summary)**
 
-### **💰 1.1 Revenue KPI**
+### **1.1 💰 Revenue KPI**
 
 * **Name:** Total Revenue (Month-to-date)  
 * **Type:** KPI card \+ tiny sparkline  
@@ -212,7 +214,7 @@ Below is the **complete data specification** for every element on the dashboard.
   * `Daily revenue for the current month (array of numbers, 1 value per day)`  
   * `Daily revenue for the previous month (array of numbers, 1 value per day)`
 
-### **💸 1.2 Ad Spend KPI**
+### **1.2 💸 Ad Spend KPI**
 
 * **Name:** Ad Spend (Month-to-date)  
 * **Type:** KPI card \+ tiny sparkline  
@@ -221,7 +223,7 @@ Below is the **complete data specification** for every element on the dashboard.
   * `Daily ad spend for the previous month`  
   * `(Same structure as revenue)`
 
-### **📈 1.3 ROAS KPI**
+### **1.3 📈 ROAS KPI**
 
 * **Name:** ROAS (Return on Ad Spend)  
 * **Type:** KPI card \+ tiny sparkline  
@@ -229,7 +231,7 @@ Below is the **complete data specification** for every element on the dashboard.
   * `Daily ROAS for the current month`   
   * `Daily ROAS for the previous month`
 
-### **📊 1.4 ROI KPI**
+### **1.4 📊 ROI KPI**
 
 * **Name:** ROI (%)  
 * **Type:** KPI card \+ tiny sparkline  
@@ -245,7 +247,7 @@ Smart Alerts now operate in a **server-driven** model. The backend returns struc
 
 Below is the format.
 
-### **⚡ 2.1 Performance Gain Alert (Server-Driven)**
+### **2.1 ⚡ Performance Gain Alert (Server-Driven)**
 
 **Sample Message:** *"ROAS up 18% MoM — driven mainly by Google campaigns"*
 
@@ -260,7 +262,7 @@ Below is the format.
 
 ---
 
-### **✨ 2.2 Channel Mix Efficiency Alert (Server-Driven)**
+### **2.2 ✨ Channel Mix Efficiency Alert (Server-Driven)**
 
 **Sample Message:** *"Shift 10–15% budget from Meta to Google — higher revenue efficiency observed"*
 
@@ -276,7 +278,7 @@ Below is the format.
 
 ---
 
-### **⚠️ 2.3 Budget Reallocation / Risk Alert (Server-Driven)**
+### **2.3 ⚠️ Budget Reallocation / Risk Alert (Server-Driven)**
 
 **Sample Message:** *"Google spend up 25% but ROAS flat — review campaigns"*
 
