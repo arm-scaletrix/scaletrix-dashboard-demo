@@ -28,9 +28,17 @@ Deploy seamlessly on **GitHub Pages**, **Vercel**, **Netlify**, or any static ho
 
 # **🧭 Project Features**
 
-## **1️⃣ Authentication — Login Page**
+## **1️⃣ Authentication — Login & Register Pages**
 
-A minimal login screen (`index.html`) that redirects to the dashboard.
+A minimal auth flow with two entry pages:
+
+- **Login Page** → `index.html`  
+  Simple email/password form that (for now) redirects to the dashboard on submit.
+
+- **Register Page** → `register.html`  
+  Basic signup-style screen designed to be wired later to a real backend (JWT / API-based registration).
+
+Both pages are purely frontend today, but the layout is ready for plugging into a real auth service.
 
 ---
 
