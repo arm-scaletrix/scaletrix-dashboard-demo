@@ -325,6 +325,8 @@ Below is the format.
   * **`Blended CAC`** `per period (all channels)`  
   * **`Paid CAC`** `per period (only paid channels)`
 
+---
+
 ### **3.3 📈 CAC Trend — Meta / Google / LinkedIn**
 
 * **Name:** CAC Trend – Meta · Google · LinkedIn  
@@ -412,7 +414,7 @@ Below is the format.
   * **`Percentage of revenue from repeat customers`**  
   * `(for tooltips):`  
     * `Revenue from new customers (in Lakhs)`  
-* `Revenue from repeat customers (in Lakhs)`
+    * `Revenue from repeat customers (in Lakhs)`
 
 ---
 
