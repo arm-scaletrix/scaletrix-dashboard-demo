@@ -626,6 +626,89 @@ body {
     cursor: zoom-in;
 }
 
+/* ===== Responsive tweaks for chart modal ===== */
+
+/* Medium screens: small laptops / tablets (<= 1024px) */
+@media (max-width: 1024px) {
+    .chart-modal-inner {
+        width: min(950px, 96vw);
+        height: min(600px, 80vh);
+        padding: 14px 14px 16px;
+    }
+
+    .chart-modal-header h3 {
+        font-size: 1rem;
+    }
+
+    .chart-modal-btn {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+    }
+}
+
+/* Tablets & large phones (<= 768px) */
+@media (max-width: 768px) {
+    .chart-modal-inner {
+        width: 96vw;
+        height: 82vh;
+        border-radius: 14px;
+        padding: 12px;
+    }
+
+    .chart-modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .chart-modal-actions {
+        align-self: flex-end;
+    }
+
+    #chart-modal-title {
+        font-size: 0.95rem;
+    }
+
+    #chart-modal-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .chart-modal-btn {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+    }
+}
+
+/* Small phones (<= 480px) – go almost full-screen */
+@media (max-width: 480px) {
+    .chart-modal-inner {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        padding: 10px 10px 12px;
+    }
+
+    .chart-modal-header {
+        gap: 6px;
+    }
+
+    #chart-modal-title {
+        font-size: 0.9rem;
+    }
+
+    #chart-modal-subtitle {
+        font-size: 0.72rem;
+    }
+
+    .chart-modal-btn {
+        font-size: 0.65rem;
+        padding: 4px 8px;
+    }
+
+    .chart-modal-body {
+        margin-top: 6px;
+    }
+}
 
 
 /* ===== Smart Alerts Section ===== */
