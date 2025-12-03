@@ -58,8 +58,9 @@
                     </div>
                 </div>
 
-                <span id="client-id-display" class="client-id-text">
-                    <strong style="font-size: 0.9rem;">{{client_id}}</strong>
+                <!-- CLICKABLE CLIENT ID -->
+                <span id="client-id-display" class="client-id-text cursor-pointer inline-flex items-center gap-1">
+                    <strong style="font-size: 0.9rem;">analytixlabs_main</strong>
                 </span>
 
                 <button class="logout-button" onclick="location.href='./index.html'">
@@ -305,15 +306,66 @@
 
     <!-- Loader -->
     <div id="loader" class="hidden fixed inset-0 bg-gray-950 bg-opacity-70 flex items-center justify-center z-50">
+        <div class="animate-spin h-16 w-16 border-4 border-t-emerald-500 border-gray-300 rounded-full"></div>
+    </div>
 
+    <!-- CLIENT PROFILE / ADS CONNECTION MODAL -->
+    <div id="client-modal-backdrop" class="client-modal-backdrop hidden">
+        <div class="client-modal-panel">
+            <!-- Close button -->
+            <button id="client-modal-close" class="client-modal-close" aria-label="Close">
+                ✕
+            </button>
 
-        <!-- Loader -->
-        <div id="loader" class="hidden fixed inset-0 bg-gray-950 bg-opacity-70 flex items-center justify-center z-50">
-            <div class="animate-spin h-16 w-16 border-4 border-t-emerald-500 border-gray-300 rounded-full"></div>
+            <h2 class="client-modal-title">Client Profile</h2>
+            <p class="client-modal-subtitle">
+                View workspace details and connect your ad accounts.
+            </p>
+
+            <!-- Client Info Section -->
+            <div class="client-modal-section">
+                <h3 class="client-modal-section-title">Client Info</h3>
+                <dl class="client-modal-info-grid">
+                    <div>
+                        <dt>Client ID</dt>
+                        <dd id="client-modal-client-id">--</dd>
+                    </div>
+                    <div>
+                        <dt>Email</dt>
+                        <dd id="client-modal-client-email">client@example.com</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- Ads Connections Section -->
+            <div class="client-modal-section">
+                <h3 class="client-modal-section-title">Ads Connections</h3>
+
+                <button id="google-ads-connect" class="client-modal-btn client-modal-btn-google">
+                    <a id="google-ads-link" href="#"
+                        data-base-url="https://scalex-ads-connector-268453003438.asia-south1.run.app/oauth/google/start"
+                        target="_blank" rel="noopener noreferrer">Connect
+                        Google
+                        Ads</a>
+                </button>
+
+                <button id="meta-ads-connect" class="client-modal-btn client-modal-btn-meta">
+                    <a id="meta-ads-link" href="#"
+                        data-base-url="https://scalex-ads-connector-268453003438.asia-south1.run.app/oauth/meta/start"
+                        target="_blank" rel="noopener noreferrer">Connect
+                        Meta Ads</a>
+                </button>
+
+                <p class="client-modal-helper">
+                    When you click these buttons, we’ll open a secure window to connect your
+                    Google / Meta ads account using OAuth.
+                </p>
+            </div>
         </div>
+    </div>
 
-        <!-- Layout JS -->
-        <script src="./static/js/dashboard_layout.js"></script>
+    <!-- Layout JS -->
+    <script src="./static/js/dashboard_layout.js"></script>
 </body>
 
 </html>

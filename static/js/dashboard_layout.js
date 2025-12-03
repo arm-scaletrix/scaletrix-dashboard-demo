@@ -2529,3 +2529,98 @@ document.addEventListener('DOMContentLoaded', function () {
     // 10) Initial KPI card render (sparklines + values)
     renderKpiCards();
 });
+
+
+
+/* ------------------------------------------------------------------
+ * Client Profile / Ads Connection Modal Logic
+ * ------------------------------------------------------------------ */
+
+(function () {
+    const clientIdDisplay = document.getElementById('client-id-display');
+    const modalBackdrop = document.getElementById('client-modal-backdrop');
+    const closeBtn = document.getElementById('client-modal-close');
+    const clientIdValueEl = document.getElementById('client-modal-client-id');
+    const clientEmailEl = document.getElementById('client-modal-client-email');
+
+    const googleBtn = document.getElementById('google-ads-connect');
+    const metaBtn = document.getElementById('meta-ads-connect');
+    const googleLink = document.getElementById('google-ads-link');
+    const metaLink = document.getElementById('meta-ads-link');
+
+    if (!clientIdDisplay || !modalBackdrop) {
+        return; // safe guard if markup not present
+    }
+
+    function openClientModal() {
+        // Read client id from header
+        const rawText = clientIdDisplay.textContent || '';
+        const cleanedClientId = rawText.trim();
+
+        // Show client id inside modal
+        if (clientIdValueEl) {
+            clientIdValueEl.textContent = cleanedClientId || '--';
+        }
+
+        // TODO: Replace this with actual email from backend when available
+        if (clientEmailEl && !clientEmailEl.textContent.trim()) {
+            clientEmailEl.textContent = 'client@example.com';
+        }
+
+        // Build dynamic URLs for Google / Meta links
+        const clientIdParam = encodeURIComponent(cleanedClientId || '');
+        
+        if (googleLink) {
+            const baseUrl = googleLink.dataset.baseUrl;
+            if (baseUrl && clientIdParam) {
+                googleLink.href = `${baseUrl}?client_id=${clientIdParam}`;
+            }
+        }
+
+        if (metaLink) {
+            const baseUrl = metaLink.dataset.baseUrl;
+            if (baseUrl && clientIdParam) {
+                metaLink.href = `${baseUrl}?client_id=${clientIdParam}`;
+            }
+        }
+
+        // Open modal
+        modalBackdrop.classList.remove('hidden');
+        document.body.classList.add('client-modal-open');
+    }
+
+    function closeClientModal() {
+        modalBackdrop.classList.add('hidden');
+        document.body.classList.remove('client-modal-open');
+    }
+
+    // Open on client id click
+    clientIdDisplay.addEventListener('click', openClientModal);
+
+    // Close on ✕
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeClientModal);
+    }
+
+    // Close when clicking outside the panel
+    modalBackdrop.addEventListener('click', (evt) => {
+        if (evt.target === modalBackdrop) {
+            closeClientModal();
+        }
+    });
+
+    // Placeholder click handlers for connect buttons
+    if (googleBtn) {
+        googleBtn.addEventListener('click', () => {
+            console.log('TODO: trigger Google Ads OAuth popup for this client');
+            // Later: redirect to /oauth/google?client_id=...
+        });
+    }
+
+    if (metaBtn) {
+        metaBtn.addEventListener('click', () => {
+            console.log('TODO: trigger Meta Ads OAuth popup for this client');
+            // Later: redirect to /oauth/meta?client_id=...
+        });
+    }
+})();

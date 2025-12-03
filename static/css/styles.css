@@ -123,6 +123,11 @@ body {
     color: #e5e7eb; /* slate-200 */
 }
 
+.client-id-text:hover {
+    color: #34d399; /* emerald-400 */
+    text-shadow: 0 0 6px rgba(52, 211, 153, 0.9);
+}
+
 /* Logout button */
 .logout-button {
     display: inline-flex;
@@ -956,3 +961,237 @@ body {
     color: #020617;
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
+
+
+
+/* ===== Client Profile / Ads Connection Modal ===== */
+
+.client-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Dark overlay + blur */
+    background: rgba(3, 7, 18, 0.75);
+    backdrop-filter: blur(10px);
+}
+
+.client-modal-backdrop.hidden {
+    display: none;
+}
+
+.client-modal-panel {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 18px;
+    padding: 18px 20px 20px;
+
+    /* Glass / emerald tint to match dashboard */
+    background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.16), transparent),
+        radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.14), transparent),
+        rgba(15, 23, 42, 0.96);
+
+    border: 1px solid rgba(52, 211, 153, 0.22);
+    box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.85),
+        0 0 24px rgba(16, 185, 129, 0.25);
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: #e5e7eb;
+    position: relative;
+}
+
+/* Close button (top-right inside panel) */
+.client-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    border-radius: 9999px;
+    border: 1px solid rgba(148, 163, 253, 0.45);
+    background-color: rgba(15, 23, 42, 0.92);
+    color: #e5e7eb;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+
+.client-modal-close:hover {
+    background-color: #ef4444;
+    color: #020617;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+}
+
+/* Titles */
+.client-modal-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-right: 28px; /* leave space for close button */
+}
+
+.client-modal-subtitle {
+    font-size: 0.78rem;
+    color: #9ca3af;
+}
+
+/* Sections */
+.client-modal-section {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(30, 64, 175, 0.4);
+}
+
+.client-modal-section-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #a5b4fc;
+    margin-bottom: 6px;
+}
+
+/* Client info layout */
+.client-modal-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    font-size: 0.8rem;
+}
+
+.client-modal-info-grid dt {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: #9ca3af;
+}
+
+.client-modal-info-grid dd {
+    margin: 2px 0 0 0;
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+/* Buttons */
+.client-modal-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 8px 10px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.8);
+}
+
+.client-modal-btn-google {
+    background: #047857;
+    color: #f9fafb;
+}
+
+.client-modal-btn-google:hover {
+    background: #065F46;
+}
+
+.client-modal-btn-meta {
+    background: #047857;
+    color: #f9fafb;
+}
+
+.client-modal-btn-meta:hover {
+    background: #065F46;
+}
+
+.client-modal-helper {
+    margin-top: 6px;
+    font-size: 0.72rem;
+    color: #9ca3af;
+}
+
+/* Optional: add a slight blur to main content when modal is open */
+body.client-modal-open #main-header,
+body.client-modal-open .layout-container {
+    filter: blur(2px);
+}
+
+/* ------------------------------------------------------
+ * RESPONSIVE MODAL TUNING FOR TABLET & MOBILE
+ * ------------------------------------------------------ */
+
+/* Tablets (width <= 1024px) */
+@media (max-width: 1024px) {
+    .client-modal-panel {
+        max-width: 380px;
+        padding: 16px 18px 18px;
+        border-radius: 16px;
+        gap: 10px;
+    }
+
+    .client-modal-title {
+        font-size: 0.95rem;
+    }
+
+    .client-modal-subtitle {
+        font-size: 0.72rem;
+    }
+
+    .client-modal-section-title {
+        font-size: 0.75rem;
+    }
+
+    .client-modal-info-grid {
+        font-size: 0.76rem;
+    }
+
+    .client-modal-btn {
+        font-size: 0.75rem;
+        padding: 7px 10px;
+    }
+}
+
+/* Mobile small (width <= 480px) */
+@media (max-width: 640px) {
+    .client-modal-panel {
+        max-width: 90%;
+        max-height: 90%;
+        padding: 12px 14px 14px;
+        border-radius: 12px;
+        gap: 6px;
+    }
+
+    .client-modal-title {
+        font-size: 0.75rem;
+    }
+
+    .client-modal-subtitle {
+        font-size: 0.58rem;
+    }
+
+    .client-modal-section-title {
+        font-size: 0.62rem;
+    }
+
+    .client-modal-btn {
+        font-size: 0.6rem;
+        padding: 6px 8px;
+    }
+
+    .client-modal-info-grid dt,
+    .client-modal-info-grid dd {
+        font-size: 0.62rem;
+    }
+}
+
