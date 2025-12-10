@@ -6,8 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ScaleX Dashboard</title>
 
+    <link rel="icon" type="image/x-icon" href="./static/icons/favicon.ico">
+
     <!-- Tailwind -->
     <link href="./static/css/tailwind.css" rel="stylesheet">
+
+    <!-- jQuery (Required for DateRangePicker) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Moment.js -->
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+
+    <!-- DateRangePicker CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.css" />
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.js"></script>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -101,21 +113,32 @@
                 </h2>
 
                 <!-- Grouping & Filtering (hidden for now) -->
-                <div id="filter-section" class=" mt-4 rounded-lg">
-                    <div id="filter-header" class="flex justify-between items-center px-4 py-3 cursor-pointer"
+                <div id="filter-section" class="mt-4 rounded-lg filter-section">
+                    <div id="filter-header"
+                        class="flex justify-between items-center px-4 py-3 cursor-pointer filter-header"
                         onclick="toggleFilterSection()">
-                        <h3 class="text-sm font-semibold text-white">Grouping and Filtering</h3>
-                        <i id="filter-toggle-arrow" data-lucide="chevron-down"
-                            class="w-4 h-4 text-white transition-transform duration-200"></i>
+                        <h3 class="text-sm font-semibold text-white filter-title">Grouping and Filtering</h3>
+                        <svg id="filter-toggle-arrow" class="filter-arrow" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
                     </div>
 
-                    <div id="filter-content" class="hidden p-4">
-                        <div id="filters-container" class="flex flex-wrap gap-4"></div>
-                        <div id="filter-button" class="mt-4">
-                            <button onclick="window.handleFilterSubmit && handleFilterSubmit()"
-                                class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg cursor-pointer">
-                                Apply filters
-                            </button>
+                    <div id="filter-content" class="hidden p-4 filter-content">
+                        <!-- Messages -->
+                        <div class="error-message" id="errorMessage"></div>
+                        <div class="success-message" id="successMessage"></div>
+
+                        <!-- Date Range Selector -->
+                        <div class="date-range-wrapper">
+                            <label class="date-range-label">📅 Select Date Range</label>
+                            <input type="text" id="daterangepicker" placeholder="Select date range" />
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="filter-actions">
+                            <button onclick="handleFilterReset()" class="btn btn-secondary">Reset</button>
+                            <button onclick="handleFilterSubmit()" class="btn btn-primary">Apply</button>
                         </div>
                     </div>
                 </div>

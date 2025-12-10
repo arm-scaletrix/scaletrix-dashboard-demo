@@ -2373,6 +2373,194 @@ function downloadChannelPerformanceCSV() {
     URL.revokeObjectURL(url);
 }
 
+
+
+
+
+
+
+
+
+
+
+// ==========================================
+// SESSION STORAGE & DATE FILTER CONFIG
+// ==========================================
+
+const dateFilterConfig = {
+    apiEndpoint: '/api/data/filter',
+    apiMethod: 'POST',
+    apiHeaders: {
+        'Content-Type': 'application/json',
+    },
+    storageKey: 'dateRange'
+};
+
+let filterState = {
+    startDate: null,
+    endDate: null
+};
+
+// ==========================================
+// UTILITY FUNCTIONS
+// ==========================================
+
+/**
+ * Store date range in session storage
+ */
+function storeDateRange(startDate, endDate) {
+    const payload = {
+        dateRange: {
+            startDate: startDate.format('YYYY-MM-DD'),
+            endDate: endDate.format('YYYY-MM-DD')
+        },
+        comparison: false,
+        timestamp: moment().toISOString()
+    };
+
+    sessionStorage.setItem(dateFilterConfig.storageKey, JSON.stringify(payload));
+    return payload;
+}
+
+/**
+ * Retrieve stored date range from session storage
+ */
+function getStoredDateRange() {
+    const stored = sessionStorage.getItem(dateFilterConfig.storageKey);
+    return stored ? JSON.parse(stored) : null;
+}
+
+// ==========================================
+// INITIALIZE DateRangePicker
+// ==========================================
+
+function initializeDateRangePicker() {
+    // Check if there's a stored date range
+    const stored = getStoredDateRange();
+    let startDate = moment().subtract(7, 'days');
+    let endDate = moment().subtract(1, 'days');
+
+    if (stored && stored.dateRange) {
+        startDate = moment(stored.dateRange.startDate);
+        endDate = moment(stored.dateRange.endDate);
+    }
+    storeDateRange(startDate, endDate);
+
+    $('#daterangepicker').daterangepicker({
+        startDate: startDate,
+        endDate: endDate,
+        minDate: moment().subtract(1, 'years'),
+        maxDate: moment(),
+        dateLimit: { days: 365 },
+        showCustomRangeLabel: true,
+        alwaysShowCalendars: true,
+        opens: 'center',
+        drops: 'down',
+        buttonClasses: ['btn', 'btn-sm'],
+        
+        // Presets
+        ranges: {
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'day'), moment().subtract(1, 'day')],
+            'This Week': [moment().startOf('week'), moment()],
+            'Last Week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+            'This Month': [moment().startOf('month'), moment()],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+            'Last 7 Days': [moment().subtract(7, 'days'), moment().subtract(1, 'days')],
+            'Last 14 Days': [moment().subtract(14, 'days'), moment().subtract(1, 'days')],
+            'Last 30 Days': [moment().subtract(30, 'days'), moment().subtract(1, 'days')],
+            'Last 90 Days': [moment().subtract(90, 'days'), moment().subtract(1, 'days')]
+        },
+        
+        locale: {
+            format: 'DD/MM/YYYY',
+            separator: ' - ',
+            applyLabel: 'Apply',
+            cancelLabel: 'Cancel',
+            customRangeLabel: 'Custom',
+            daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            monthNames: ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'],
+            firstDay: 1
+        }
+    }, function(start, end, label) {
+        // Called when date range is applied
+        filterState.startDate = start.clone();
+        filterState.endDate = end.clone();
+        // Immediately persist to sessionStorage
+        storeDateRange(filterState.startDate, filterState.endDate);
+    });
+
+    // Set initial values if stored
+    if (stored) {
+        filterState.startDate = startDate;
+        filterState.endDate = endDate;
+    } else {
+        filterState.startDate = startDate;
+        filterState.endDate = endDate;
+    }
+}
+
+/**
+ * Show/Hide message
+ */
+function showMessage(message, type = 'info') {
+    const messageEl = type === 'error' ? document.getElementById('errorMessage') : 
+                    type === 'success' ? document.getElementById('successMessage') : null;
+    
+    if (messageEl) {
+        messageEl.textContent = message;
+        messageEl.classList.add('show');
+        setTimeout(() => messageEl.classList.remove('show'), 5000);
+    }
+}
+
+// ==========================================
+// FILTER ACTIONS
+// ==========================================
+
+function handleFilterSubmit() {
+    
+}
+
+function handleFilterReset() {
+    // Clear session storage
+    sessionStorage.removeItem(dateFilterConfig.storageKey);
+    
+    // Reset to last 7 days
+    const start = moment().subtract(7, 'days');
+    const end = moment().subtract(1, 'days');
+    
+    filterState.startDate = start;
+    filterState.endDate = end;
+    
+    $('#daterangepicker').data('daterangepicker').setStartDate(start);
+    $('#daterangepicker').data('daterangepicker').setEndDate(end);
+    $('#daterangepicker').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+
+    // Also persist the reset range
+    storeDateRange(start, end);
+    
+}
+
+// Make getStoredDateRange available globally
+window.getStoredDateRange = getStoredDateRange;
+window.storeDateRange = storeDateRange;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ============================================================================
  * DOM-READY WIRES: icons, export menu, modal buttons, sidebar routing, KPIs
  * ========================================================================== */
@@ -2382,6 +2570,11 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.lucide) {
         window.lucide.createIcons();
     }
+
+    // 1.1) Initialize DateRangePicker
+    initializeDateRangePicker();
+    // Check for existing stored data
+    const stored = getStoredDateRange();
 
     // 2) Export dropdown toggle (header export button)
     const exportToggle = document.getElementById('export-toggle');
