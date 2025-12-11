@@ -1,29 +1,59 @@
-/* ===== Base ===== */
+/* ===== CRITICAL FIX: FLEXBOX STRUCTURE FOR EMPTY STATE ===== */
 
 html {
-  	overflow-x: hidden;
-	min-height: 100dvh;
-	height: auto;
+    font-size: 14px;
+    overflow-x: hidden;
+    min-height: 100dvh;
+    height: auto;
     scrollbar-width: none;
+}
+
+/* Tablet (768px - 1023px): Reduce to 86% (12px) */
+@media (max-width: 1023px) {
+    html {
+        font-size: 13px;
+    }
+    .logo-img {
+        height: 50px;
+    }
+}
+
+/* Mobile (below 768px): Reduce to 79% (11px) */
+@media (max-width: 767px) {
+    html {
+        font-size: 12px;
+    }
+    .logo-img {
+        height: 10px;
+    }
+}
+
+/* Small Mobile (below 480px): Reduce to 75% (10.5px) */
+@media (max-width: 479px) {
+    html {
+        font-size: 11px;
+    }
+    .logo-img {
+        height: 10px;
+    }
 }
 
 body {
     margin: 0;
     padding: 0;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, -system-ui, sans-serif;
-    /* background: radial-gradient(circle at top left, #064e3b 0%, #020817 70%, #020817 100%); */
-    /* background: radial-gradient(circle at top left, rgb(6 78 59) 0%, rgb(17 24 39) 70%, rgb(3 7 18) 100%); */
-    /* background-image: linear-gradient(to right,rgb(6 78 59) 0%,rgb(17 24 39) 80%,rgb(3 7 18)); */
     background: radial-gradient(circle at top left, #0c614a 0%, rgb(28, 41, 70) 80%, #05143b 100%);
     color: #ffffff;
     overflow-y: auto;
-	min-height: 100dvh;
-	height: auto;
+    min-height: 100dvh;
+    height: auto;
+    /* FIX 1: Make body a flex container */
+    display: flex;
+    flex-direction: column;
 }
 
 /* ===== Header ===== */
 
-/* Header itself is fixed & transparent; inner container carries the visual */
 #main-header {
     position: fixed;
     top: 0;
@@ -33,27 +63,30 @@ body {
     height: 80px;
     display: flex;
     align-items: center;
-    /* background: radial-gradient(circle at top left, #064e3b 0%, #020817 90%, #020817 100%); */
-    /* background: radial-gradient(circle at top left, rgb(6 78 59) 0%, rgb(17 24 39) 95%, rgb(3 7 18) 100%); */
-	  backdrop-filter: blur(50px);
+    backdrop-filter: blur(50px);
+    /* FIX 2: Prevent header from shrinking */
+    flex-shrink: 0;
 }
 
 .header-inner {
-    max-width: 1280px;
     max-width: 1400px;
     width: 100%;
     margin: 0 auto;
-	padding-right: 16px;
+    padding-right: 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     box-sizing: border-box;
 }
 
+/* FIX 3: Page wrapper with flex layout */
 .page {
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
+    flex: 1;
+    /* Account for fixed header */
+    margin-top: 80px;
 }
 
 .export-wrapper {
@@ -72,7 +105,7 @@ body {
 }
 
 .export-button:hover {
-    color: #34d399; /* emerald-400 */
+    color: #34d399;
     text-shadow: 0 0 6px rgba(52, 211, 153, 0.9);
 }
 
@@ -109,7 +142,6 @@ body {
     color: #10b981;
 }
 
-/* Logo */
 .logo-img {
     height: 70px;
     width: auto;
@@ -117,18 +149,16 @@ body {
     display: block;
 }
 
-/* app_id text */
 .client-id-text {
     font-size: 1.05rem;
-    color: #e5e7eb; /* slate-200 */
+    color: #e5e7eb;
 }
 
 .client-id-text:hover {
-    color: #34d399; /* emerald-400 */
+    color: #34d399;
     text-shadow: 0 0 6px rgba(52, 211, 153, 0.9);
 }
 
-/* Logout button */
 .logout-button {
     display: inline-flex;
     align-items: center;
@@ -136,7 +166,7 @@ body {
     width: 36px;
     height: 36px;
     border-radius: 9999px;
-    background-color: #111827; /* gray-900 */
+    background-color: #111827;
     color: #ffffff;
     border: 1px solid rgba(148, 163, 253, 0.15);
     cursor: pointer;
@@ -145,7 +175,7 @@ body {
 }
 
 .logout-button:hover {
-    background-color: #dc2626; /* red-600 */
+    background-color: #dc2626;
     box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
     transform: translateY(-1px);
 }
@@ -155,49 +185,52 @@ body {
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 
-/* ===== Layout Container ===== */
+/* ===== LAYOUT CONTAINER - KEY FIX ===== */
 
 .layout-container {
     max-width: 1380px;
     margin: 0 auto;
-    padding: 90px 16px 16px;  /* below fixed header */
+    padding: 16px 16px 16px;
     display: flex;
     box-sizing: border-box;
     gap: 16px;
-    /* background: radial-gradient(circle at top left, rgb(6 78 59) 0%, rgb(17 24 39) 80%, rgb(3 7 18) 100%); */
+    /* FIX 4: Make container flex and fill vertical space */
+    flex: 1;
+    width: 100%;
+    min-height: 100%;
 }
 
-/* On very large screens, sides naturally show background gradient = "blank with shade" */
-
-/* ===== Sidebar ===== */
+/* ===== SIDEBAR ===== */
 
 .sidebar {
-    width: 18rem; /* 288px */
+    width: 18rem;
     padding: 16px 16px 20px;
     padding-top: 40px;
     box-sizing: border-box;
     border-radius: 16px;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
-    min-height: calc(100dvh - 125px - 80px);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    /* FIX 5: Prevent sidebar from shrinking */
+    flex-shrink: 0;
+    /* FIX 6: Set a proper min-height for sidebar */
+    min-height: fit-content;
 }
 
-/* Sidebar links */
 .sidebar-link {
     display: block;
     padding: 0.55rem 0.6rem;
     font-size: 0.95rem;
     font-weight: 500;
-    color: #e5e7eb; /* slate-200 */
+    color: #e5e7eb;
     border-radius: 0.4rem;
     transition: all 0.15s ease-in-out;
     cursor: pointer;
 }
 
 .sidebar-link:hover {
-    color: #34d399; /* emerald-400 */
+    color: #34d399;
     text-shadow: 0 0 6px rgba(52, 211, 153, 0.9);
     background-color: rgba(6, 95, 70, 0.25);
 }
@@ -209,14 +242,18 @@ body {
     box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
 }
 
-/* ===== Main Content ===== */
+/* ===== MAIN CONTENT - KEY FIX ===== */
 
 .main-content {
     flex: 1;
-    /* min-height: calc(100dvh - 125px); */
-    /* min-width: 850px; */
     padding-top: 4px;
     box-sizing: border-box;
+    /* FIX 7: Make main content a flex container */
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    /* FIX 8: Allow proper width shrinking */
+    min-width: 0;
 }
 
 #filter-section {
@@ -263,12 +300,6 @@ body {
     transform: rotate(180deg);
 }
 
-/* #filter-button {
-    text-align: right;
-    font-size: 0.75rem;
-} */
-
-/* Filter Action Buttons */
 .filter-actions {
     display: flex;
     gap: 10px;
@@ -307,19 +338,17 @@ body {
 }
 
 .btn-secondary {
-    background-color: #4B5563;   /* Gray-600 */
-    color: #E5E7EB;              /* Gray-200 */
+    background-color: #4B5563;
+    color: #E5E7EB;
     transition: background-color 0.2s ease, border-color 0.2s ease;
     padding: 5px 15px;
-    /* border: 1px solid #dadce0; */
 }
 
 .btn-secondary:hover:not(:disabled) {
-    background-color: #374151;   /* Gray-700 (darker) */
-    color: #F3F4F6;              /* Gray-100 */
+    background-color: #374151;
+    color: #F3F4F6;
 }
 
-/* Date Range Input */
 .date-range-wrapper {
     margin-bottom: 16px;
 }
@@ -327,7 +356,6 @@ body {
 .date-range-label {
     font-size: 0.7rem;
     font-weight: 500;
-    /* color: #5f6368; */
     text-transform: uppercase;
     letter-spacing: 0.3px;
     margin-bottom: 8px;
@@ -337,7 +365,6 @@ body {
 #daterangepicker {
     width: auto;
     padding: 8px 10px;
-    /* background: #ffffff; */
     color: #c7cfe0;
     border: 2px solid rgba(52, 211, 153, 0.2);
     border-radius: 8px;
@@ -348,7 +375,6 @@ body {
     transition: all 0.2s ease;
 }
 
-/* Make date range input full width on small screens */
 @media (max-width: 768px) {
     #daterangepicker {
         width: 100%;
@@ -361,7 +387,6 @@ body {
 }
 
 #daterangepicker:hover {
-    /* background: #f3f3f3; */
     border-color: 2px solid rgba(44, 168, 123, 0.1);
     box-shadow: 0 4px 18px rgba(16, 185, 129, 0.12), 0 0 22px rgba(0, 0, 0, 0.40);
 }
@@ -371,9 +396,7 @@ body {
     box-shadow: 0 4px 18px rgba(16, 185, 129, 0.12), 0 0 22px rgba(0, 0, 0, 0.40);
 }
 
-/* DateRangePicker Customization */
 .daterangepicker {
-    /* background: #ffffff; */
     border: 1px solid #dadce0;
     border-radius: 8px;
     box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
@@ -411,8 +434,8 @@ body {
 }
 
 .daterangepicker .drp-buttons .btn {
-    width: auto;              /* ensure no full-width leak */
-    margin-left: 8px;         /* small spacing between Cancel & Apply */
+    width: auto;
+    margin-left: 8px;
 }
 
 .daterangepicker .drp-buttons span {
@@ -451,7 +474,6 @@ body {
 }
 
 .daterangepicker .ranges ul li {
-    /* background-color: #f0f8f4; */
     color: #1f6934;
     border-radius: 4px;
     margin-bottom: 8px;
@@ -470,7 +492,6 @@ body {
     font-weight: 600;
 }
 
-
 .daterangepicker th,
 .daterangepicker .drp-calendar-header {
     color: #202124;
@@ -481,7 +502,6 @@ body {
     color: #202124;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .filter-actions {
         flex-direction: column;
@@ -498,68 +518,58 @@ body {
 
     .daterangepicker .drp-buttons {
         display: flex !important;
-        flex-direction: column;        
-        align-items: center !important; 
-        justify-content: center;       
-        text-align: center !important; 
-        gap: 2px; 
+        flex-direction: column;
+        align-items: center !important;
+        justify-content: center;
+        text-align: center !important;
+        gap: 2px;
     }
 
     .daterangepicker .drp-buttons .btn-default,
     .daterangepicker .drp-buttons .btn-primary {
         width: 100%;
     }
-
 }
 
-
-
-
-/* ===== Footer ===== */
-
 #main-footer {
-    /* background: radial-gradient(circle at top left, #064e3b 0%, #020817 70%, #020817 100%); */
-    color: #9ca3af; /* gray-400 */
+    color: #9ca3af;
     text-align: center;
     padding: 16px 0;
     font-size: 0.8rem;
     letter-spacing: 0.04em;
     background: transparent;
+    /* FIX 9: Prevent footer from shrinking */
+    flex-shrink: 0;
 }
 
-/* Keeps it visually separate from content */
 .footer-inner {
     max-width: 1440px;
     margin: 0 auto;
     padding: 0 24px;
 }
 
-/* Table area */
 #user-engagement-table-wrapper {
     scrollbar-width: none;
 }
 
-/* Loader */
 #loader {
     z-index: 100;
 }
 
-/* ===== Responsive ===== */
-
 @media (max-width: 900px) {
-        .logo-img {
-        height: 60px;
+    .page {
+        margin-top: 0;
     }
 
     .layout-container {
         flex-direction: column;
-        padding-top: 104px;
+        padding-top: 90px;
     }
 
     .logout-button {
         width: 28px;
         height: 28px;
-        background-color: #dc2626; /* red-600 */
+        background-color: #dc2626;
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
     }
 
@@ -574,7 +584,6 @@ body {
         min-height: auto;
     }
 }
-
 
 /* ===== KPI Cards ===== */
 .kpi-grid {
@@ -676,7 +685,6 @@ body {
   height: 100% !important;
 }
 
-/* Accent variants per metric */
 .kpi-revenue {
   background:
     radial-gradient(circle at top left, rgba(16, 185, 129, 0.15), transparent),
@@ -705,26 +713,21 @@ body {
     rgba(3, 7, 18, 0.98);
 }
 
-
-
-/* ===== Detail Section Cards (Transparent Version) ===== */
+/* ===== Detail Section Cards ===== */
 
 .detail-card {
     border-radius: 16px;
     padding: 14px 14px 12px;
-
-    /* Subtle glowing border (emerald tint) */
     border: 1px solid rgba(52, 211, 153, 0.1);
     background: transparent;
     backdrop-filter: blur(6px);
-
-    /* Soft outer glow */
     box-shadow: 0 4px 18px rgba(16, 185, 129, 0.12),
                 0 0 22px rgba(0, 0, 0, 0.40);
-
     display: flex;
     flex-direction: column;
     gap: 6px;
+    /* FIX 10: Ensure detail cards have minimum height even when empty */
+    min-height: 240px;
 }
 
 .detail-card-header {
@@ -738,15 +741,11 @@ body {
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-
-    /* Emerald text tint */
     color: #34d399;
 }
 
 .detail-card-subtitle {
     font-size: 0.72rem;
-
-    /* Desaturated slate */
     color: #9ca3af;
 }
 
@@ -760,9 +759,6 @@ body {
     width: 100% !important;
     height: 100% !important;
 }
-
-
-/* ===== LTV Ratio Card (Transparent) ===== */
 
 .detail-ltv-body {
     margin-top: 6px;
@@ -782,7 +778,6 @@ body {
     color: #9ca3af;
 }
 
-/* Status badges tuned for transparent background */
 .detail-ltv-badge {
     display: inline-flex;
     align-items: center;
@@ -809,9 +804,13 @@ body {
     color: #f87171;
 }
 
-/* Responsive Grid */
+/* FIX 11: Detail charts grid with proper flex */
 #detail-charts {
-	grid-template-columns: repeat(1, minmax(0, 1fr));
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 14px;
+    /* FIX: Allow grid to grow/shrink properly */
+    flex: 1;
 }
 
 @media (min-width: 1024px) {
@@ -820,15 +819,12 @@ body {
     }
 }
 
-
-/* ===== Chart fullscreen modal ===== */
-
 .chart-modal {
     position: fixed;
     inset: 0;
     z-index: 70;
     background: rgba(3, 7, 18, 0.95);
-    display: flex; /* toggled via .hidden */
+    display: flex;
     align-items: center;
     justify-content: center;
 }
@@ -905,14 +901,10 @@ body {
     height: 100% !important;
 }
 
-/* Show zoom cursor on clickable charts */
 .chart-clickable {
     cursor: zoom-in;
 }
 
-/* ===== Responsive tweaks for chart modal ===== */
-
-/* Medium screens: small laptops / tablets (<= 1024px) */
 @media (max-width: 1024px) {
     .chart-modal-inner {
         width: min(950px, 96vw);
@@ -930,7 +922,6 @@ body {
     }
 }
 
-/* Tablets & large phones (<= 768px) */
 @media (max-width: 768px) {
     .chart-modal-inner {
         width: 96vw;
@@ -963,7 +954,6 @@ body {
     }
 }
 
-/* Small phones (<= 480px) – go almost full-screen */
 @media (max-width: 480px) {
     .chart-modal-inner {
         width: 100vw;
@@ -994,14 +984,10 @@ body {
     }
 }
 
-
-/* ===== Smart Alerts Section ===== */
-
 .smart-alerts {
     margin-top: 1rem;
     padding: 1.5rem;
     border-radius: 16px;
-    /* background: rgba(15, 23, 42, 0.9);           */
     box-shadow: 0 0 14px rgba(0, 0, 0, 0.4);
 }
 
@@ -1014,10 +1000,9 @@ body {
 .smart-alerts-subtitle {
     margin: 0 0 1.25rem 0;
     font-size: 0.85rem;
-    color: #d1d5db; /* gray-300 */
+    color: #d1d5db;
 }
 
-/* Grid layout for alert cards */
 .smart-alerts-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -1030,7 +1015,6 @@ body {
     }
 }
 
-/* Individual alert card */
 .alert-card {
     display: flex;
     justify-content: space-between;
@@ -1041,47 +1025,45 @@ body {
     border-left: 4px solid transparent;
 }
 
-/* Card variants */
 .alert-card--performance {
-    border-color: #34d399; /* emerald-400 */
+    border-color: #34d399;
 }
 
 .alert-card--data-quality {
-    border-color: #fbbf24; /* amber-400 */
+    border-color: #fbbf24;
 }
 
 .alert-card--attribution {
-    border-color: #38bdf8; /* sky-400 */
+    border-color: #38bdf8;
 }
 
-/* Text area */
 .alert-text-label {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: #9ca3af; /* gray-400 */
+    color: #9ca3af;
     margin-bottom: 0.25rem;
 }
 
 .alert-text-main {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #e5e7eb; /* gray-200 */
+    color: #e5e7eb;
     margin: 0;
 }
 
 .alert-highlight-green {
-    color: #34d399; /* emerald-400 */
+    color: #34d399;
     font-weight: 700;
 }
 
 .alert-highlight-red {
-    color: #f97373; /* soft red */
+    color: #f97373;
     font-weight: 700;
 }
 
 .alert-highlight-sky {
-    color: #38bdf8; /* sky-400 */
+    color: #38bdf8;
     font-weight: 700;
 }
 
@@ -1091,7 +1073,6 @@ body {
     color: #9ca3af;
 }
 
-/* Symbol on the right */
 .alert-symbol {
     font-size: 22px;
     line-height: 1;
@@ -1114,10 +1095,6 @@ body {
     color: #38bdf8;
 }
 
-
-
-/* ===== Metric tiles (Creative Performance) ===== */
-
 .metric-tiles-wrapper {
     display: flex;
     flex-wrap: wrap;
@@ -1125,7 +1102,6 @@ body {
     margin-top: 12px;
 }
 
-/* On wider screens, 3 tiles in a row */
 @media (min-width: 768px) {
     .metric-tiles-wrapper {
         justify-content: space-between;
@@ -1137,8 +1113,8 @@ body {
 
 .metric-tile {
     border-radius: 12px;
-    border: 1px solid rgba(51, 65, 85, 0.6);       /* similar to slate-700 */
-    background: rgba(15, 23, 42, 0.7);             /* dark card background */
+    border: 1px solid rgba(51, 65, 85, 0.6);
+    background: rgba(15, 23, 42, 0.7);
     padding: 8px 12px;
     display: flex;
     flex-direction: column;
@@ -1149,13 +1125,13 @@ body {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #9ca3af;                                 /* gray-400-ish */
+    color: #9ca3af;
 }
 
 .metric-tile-value {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #f9fafb;                                 /* near white */
+    color: #f9fafb;
 }
 
 .metric-tile-delta {
@@ -1163,29 +1139,27 @@ body {
 }
 
 .metric-tile-delta-up {
-    color: #4ade80;                                 /* green */
+    color: #4ade80;
 }
 
 .metric-tile-delta-down {
-    color: #f97373;                                 /* soft red */
+    color: #f97373;
 }
-
-/* ===== Channel Performance table (scrollable) ===== */
 
 .channel-performance-table-wrapper {
     width: 100%;
     height: 100%;
     margin-top: 12px;
-    overflow-x: auto;           /* horizontal scroll when needed */
+    overflow-x: auto;
     scrollbar-width: thin;
 }
 
 .channel-performance-table {
     border-collapse: collapse;
     width: 100%;
-    min-width: 720px;          /* force some width so scroll makes sense */
+    min-width: 720px;
     font-size: 0.85rem;
-    color: #e5e7eb;            /* gray-200-ish */
+    color: #e5e7eb;
 }
 
 .channel-performance-table thead tr {
@@ -1199,7 +1173,6 @@ body {
     white-space: nowrap;
 }
 
-/* left align first column, right align rest */
 .channel-performance-table th:first-child,
 .channel-performance-table td:first-child {
     text-align: left;
@@ -1210,7 +1183,6 @@ body {
     text-align: right;
 }
 
-/* row borders */
 .channel-performance-table tbody tr {
     border-bottom: 1px solid rgba(15, 23, 42, 0.85);
     border-bottom: 1px solid rgba(51, 65, 85, 0.6);
@@ -1220,13 +1192,11 @@ body {
     border-bottom: none;
 }
 
-/* Download button in detail card header */
 .detail-card-download-btn {
     font-size: 0.8rem;
     padding: 2px 8px;
     border-radius: 9999px;
     border: 1px solid rgba(148, 163, 253, 0.35);
-    /* background-color: rgba(15, 23, 42, 0.9); */
     color: #e5e7eb;
     cursor: pointer;
     transition: all 0.15s ease-in-out;
@@ -1241,10 +1211,6 @@ body {
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
 
-
-
-/* ===== Client Profile / Ads Connection Modal ===== */
-
 .client-modal-backdrop {
     position: fixed;
     inset: 0;
@@ -1252,8 +1218,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-
-    /* Dark overlay + blur */
     background: rgba(3, 7, 18, 0.75);
     backdrop-filter: blur(10px);
 }
@@ -1267,18 +1231,14 @@ body {
     max-width: 420px;
     border-radius: 18px;
     padding: 18px 20px 20px;
-
-    /* Glass / emerald tint to match dashboard */
     background:
         radial-gradient(circle at top left, rgba(16, 185, 129, 0.16), transparent),
         radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.14), transparent),
         rgba(15, 23, 42, 0.96);
-
     border: 1px solid rgba(52, 211, 153, 0.22);
     box-shadow:
         0 18px 45px rgba(0, 0, 0, 0.85),
         0 0 24px rgba(16, 185, 129, 0.25);
-
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -1286,7 +1246,6 @@ body {
     position: relative;
 }
 
-/* Close button (top-right inside panel) */
 .client-modal-close {
     position: absolute;
     top: 10px;
@@ -1311,11 +1270,10 @@ body {
     box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
 }
 
-/* Titles */
 .client-modal-title {
     font-size: 1.05rem;
     font-weight: 600;
-    margin-right: 28px; /* leave space for close button */
+    margin-right: 28px;
 }
 
 .client-modal-subtitle {
@@ -1323,7 +1281,6 @@ body {
     color: #9ca3af;
 }
 
-/* Sections */
 .client-modal-section {
     margin-top: 8px;
     padding-top: 8px;
@@ -1338,7 +1295,6 @@ body {
     margin-bottom: 6px;
 }
 
-/* Client info layout */
 .client-modal-info-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -1359,7 +1315,6 @@ body {
     color: #e5e7eb;
 }
 
-/* Buttons */
 .client-modal-btn {
     width: 100%;
     margin-top: 6px;
@@ -1400,17 +1355,11 @@ body {
     color: #9ca3af;
 }
 
-/* Optional: add a slight blur to main content when modal is open */
 body.client-modal-open #main-header,
 body.client-modal-open .layout-container {
     filter: blur(2px);
 }
 
-/* ------------------------------------------------------
- * RESPONSIVE MODAL TUNING FOR TABLET & MOBILE
- * ------------------------------------------------------ */
-
-/* Tablets (width <= 1024px) */
 @media (max-width: 1024px) {
     .client-modal-panel {
         max-width: 380px;
@@ -1441,7 +1390,6 @@ body.client-modal-open .layout-container {
     }
 }
 
-/* Mobile small (width <= 480px) */
 @media (max-width: 640px) {
     .client-modal-panel {
         max-width: 90%;
@@ -1473,13 +1421,3 @@ body.client-modal-open .layout-container {
         font-size: 0.62rem;
     }
 }
-
-
-        /* Filter Section */
-        /* .filter-section {
-            background: #ffffff;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        } */
