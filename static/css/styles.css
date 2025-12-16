@@ -31,7 +31,7 @@ html {
 /* Small Mobile (below 480px): Reduce to 75% (10.5px) */
 @media (max-width: 479px) {
     html {
-        font-size: 11px;
+        font-size: 12px;
     }
     .logo-img {
         height: 10px;
@@ -207,7 +207,7 @@ body {
     padding: 16px 16px 20px;
     padding-top: 40px;
     box-sizing: border-box;
-    border-radius: 16px;
+    border-radius: 8px;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
@@ -251,7 +251,7 @@ body {
     /* FIX 7: Make main content a flex container */
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     /* FIX 8: Allow proper width shrinking */
     min-width: 0;
 }
@@ -987,7 +987,7 @@ body {
 .smart-alerts {
     margin-top: 1rem;
     padding: 1.5rem;
-    border-radius: 16px;
+    border-radius: 8px;
     box-shadow: 0 0 14px rgba(0, 0, 0, 0.4);
 }
 
@@ -1025,16 +1025,20 @@ body {
     border-left: 4px solid transparent;
 }
 
-.alert-card--performance {
-    border-color: #34d399;
+.alert-card--positive {
+    border-color: #34d399; /* green */
 }
 
-.alert-card--data-quality {
-    border-color: #fbbf24;
+.alert-card--negative {
+    border-color: #f87171; /* red */
 }
 
-.alert-card--attribution {
-    border-color: #38bdf8;
+.alert-card--warning {
+    border-color: #fbbf24; /* amber */
+}
+
+.alert-card--info {
+    border-color: #38bdf8; /* sky */
 }
 
 .alert-text-label {
@@ -1052,20 +1056,22 @@ body {
     margin: 0;
 }
 
-.alert-highlight-green {
-    color: #34d399;
-    font-weight: 700;
+.alert-highlight {
+    font-weight: 600;
 }
 
-.alert-highlight-red {
-    color: #f97373;
-    font-weight: 700;
-}
+.alert-highlight-green { color: #34d399; }
 
-.alert-highlight-sky {
-    color: #38bdf8;
-    font-weight: 700;
-}
+.alert-highlight-red { color: #f97373; }
+
+.alert-highlight-sky { color: #38bdf8; }
+
+.alert-highlight-amber { color: #fbbf24; }
+
+.alert-symbol--green { color: #34d399; }
+.alert-symbol--red   { color: #f97373; }
+.alert-symbol--amber { color: #fbbf24; }
+.alert-symbol--sky   { color: #38bdf8; }
 
 .alert-text-sub {
     margin: 0.25rem 0 0 0;
@@ -1081,18 +1087,6 @@ body {
     justify-content: center;
     margin-left: 0.75rem;
     flex-shrink: 0;
-}
-
-.alert-symbol--green {
-    color: #34d399;
-}
-
-.alert-symbol--amber {
-    color: #fbbf24;
-}
-
-.alert-symbol--sky {
-    color: #38bdf8;
 }
 
 .metric-tiles-wrapper {

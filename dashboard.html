@@ -108,7 +108,7 @@
             <!-- CONTENT -->
             <main id="main-content" class="main-content">
                 <!-- Heading (syncs with sidebar selection) -->
-                <h2 id="main-heading" class="text-2xl font-bold mb-4">
+                <h2 id="main-heading" class="text-2xl font-bold">
                     Performance Overview
                 </h2>
 
@@ -219,20 +219,19 @@
                 <!-- SMART ALERTS -->
                 <div id="smart-alerts" class="smart-alerts">
                     <h3 class="smart-alerts-title">Smart Alerts</h3>
-                    <!-- Optional description text -->
-                    <!-- <p class="smart-alerts-subtitle">
-                        Preview of the Smart Insights &amp; Alerts panel. Values below are sample placeholders to
-                        demonstrate the type of intelligence this section will show.
-                    </p> -->
 
                     <div class="smart-alerts-grid">
 
-                        <!-- Performance Gain -->
-                        <div class="alert-card alert-card--performance">
+                        <!-- Performance Gain (alert_performance_gain) -->
+                        <div id="alert-card-performance-gain" class="alert-card alert-card--positive">
                             <div>
                                 <p class="alert-text-label">Performance Gain</p>
                                 <p class="alert-text-main">
-                                    ROAS up <span class="alert-highlight-green">18% MoM</span>
+                                    <span class="alert-main-prefix">ROAS up</span>
+                                    <span class="alert-highlight alert-highlight-green alert-main-highlight">
+                                        18% MoM
+                                    </span>
+                                    <span class="alert-main-suffix"></span>
                                 </p>
                                 <p class="alert-text-sub">
                                     Driven by higher CRM match rate.
@@ -243,31 +242,19 @@
                             </div>
                         </div>
 
-                        <!-- Data Quality Alert -->
-                        <div class="alert-card alert-card--data-quality">
+                        <!-- Channel Mix Efficiency (instead of Data Quality) -->
+                        <div id="alert-card-channel-mix" class="alert-card alert-card--info">
                             <div>
-                                <p class="alert-text-label">Data Quality Alert</p>
+                                <p class="alert-text-label">Channel Mix Efficiency</p>
                                 <p class="alert-text-main">
-                                    Event recovery <span class="alert-highlight-red">down 12%</span>
+                                    <span class="alert-main-prefix">Shift</span>
+                                    <span class="alert-highlight alert-highlight-sky alert-main-highlight">
+                                        10–15% budget
+                                    </span>
+                                    <span class="alert-main-suffix">from Meta to Google</span>
                                 </p>
                                 <p class="alert-text-sub">
-                                    Check Meta pixel sync &amp; CRM webhook.
-                                </p>
-                            </div>
-                            <div class="alert-symbol alert-symbol--amber">
-                                ⚠
-                            </div>
-                        </div>
-
-                        <!-- Attribution Insight -->
-                        <div class="alert-card alert-card--attribution">
-                            <div>
-                                <p class="alert-text-label">Attribution Insight</p>
-                                <p class="alert-text-main">
-                                    Google Ads drives <span class="alert-highlight-sky">42% of conversions</span>
-                                </p>
-                                <p class="alert-text-sub">
-                                    Majority from 2-touch journeys with Meta assist.
+                                    Higher revenue efficiency observed on Google campaigns.
                                 </p>
                             </div>
                             <div class="alert-symbol alert-symbol--sky">
@@ -275,8 +262,29 @@
                             </div>
                         </div>
 
+                        <!-- Budget / Risk (alert_budget_reallocation) -->
+                        <div id="alert-card-budget-risk" class="alert-card alert-card--warning">
+                            <div>
+                                <p class="alert-text-label">Budget / Risk</p>
+                                <p class="alert-text-main">
+                                    <span class="alert-main-prefix">Google spend up</span>
+                                    <span class="alert-highlight alert-highlight-amber alert-main-highlight">
+                                        25%
+                                    </span>
+                                    <span class="alert-main-suffix">but ROAS flat</span>
+                                </p>
+                                <p class="alert-text-sub">
+                                    Review Google non-brand campaigns for wasted spend.
+                                </p>
+                            </div>
+                            <div class="alert-symbol alert-symbol--amber">
+                                ⚠
+                            </div>
+                        </div>
+
                     </div>
                 </div>
+
 
                 <!-- DETAIL BLOCK -->
                 <div id="detail-section" class="mt-4 rounded-lg shadow-lg p-6 box-shadow-cust">
@@ -328,7 +336,8 @@
     </div>
 
     <!-- Loader -->
-    <div id="loader" class="hidden fixed inset-0 bg-gray-950 bg-opacity-70 flex items-center justify-center z-50">
+    <div id="loader" class="hidden fixed inset-0 bg-gray-950 flex items-center justify-center z-50"
+        style="background-color: rgba(3, 7, 18, 0.80);">
         <div class="animate-spin h-16 w-16 border-4 border-t-emerald-500 border-gray-300 rounded-full"></div>
     </div>
 
@@ -389,6 +398,8 @@
 
     <!-- Layout JS -->
     <script src="./static/js/dashboard_layout.js"></script>
+    <script src="./static/js/dashboard_charts.js"></script>
+    <script src="./static/js/dashboard_chart_api.js"></script>
 </body>
 
 </html>
