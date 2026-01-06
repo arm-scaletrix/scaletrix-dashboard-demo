@@ -1325,6 +1325,38 @@ body {
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.8);
 }
 
+/* ================================
+   Ads Integration States (Phase 2)
+   ================================ */
+
+/* CONNECTED: informational, inactive */
+.client-modal-btn.connected {
+    background-color: #e5e7eb;   /* light grey */
+    color: #6b7280;              /* muted text */
+    border: 1px solid #d1d5db;
+    cursor: not-allowed;
+    pointer-events: none;        /* IMPORTANT for <a> */
+    opacity: 0.9;
+    text-decoration: none;
+}
+
+/* Prevent hover override */
+.client-modal-btn.connected:hover {
+    background-color: #e5e7eb;
+    color: #6b7280;
+}
+
+/* RECONNECT: needs user action */
+.client-modal-btn.reconnect {
+    background-color: #fef3c7;   /* soft warning */
+    color: #92400e;
+    border: 1px solid #f59e0b;
+}
+
+.client-modal-btn.reconnect:hover {
+    background-color: #fde68a;
+}
+
 .client-modal-btn-google {
     background: #047857;
     color: #f9fafb;

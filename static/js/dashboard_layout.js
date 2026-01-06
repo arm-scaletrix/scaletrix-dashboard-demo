@@ -616,7 +616,7 @@ async function exportDashboard(format) {
      * @function
      * @returns {void}
      */
-    function openClientModal() {
+    async function openClientModal() {
         // Read client ID from header element
         const rawText = clientIdDisplay.textContent || '';
         const cleanedClientId = rawText.trim();
@@ -650,9 +650,30 @@ async function exportDashboard(format) {
             }
         }
 
+        /**
+         * Phase 2: refresh Ads integration status
+         * Hook: when profile popup opens, refresh status
+         * Call this when profile modal becomes visible
+         */
+        // Show loader first
+        showGlobalLoader();
+
+        try {
+            // Fetch + update UI BEFORE opening the modal
+            // loadIntegrationStatus is async already
+            await window.loadIntegrationStatus();
+        } catch (err) {
+            console.error("Phase2: loadIntegrationStatus failed:", err);
+            // Optional: you can still open modal even if status fails
+        } finally {
+            // Hide loader
+            hideGlobalLoader();
+        }
+
         // Show modal
         modalBackdrop.classList.remove('hidden');
         document.body.classList.add('client-modal-open');
+
     }
 
     /**
@@ -1056,6 +1077,148 @@ document.addEventListener('DOMContentLoaded', () => {
     // }
 });
 
+/******************************************************************
+ * Phase 2 – Ads Integrations Status Handling (FRESH + FIXED)
+ * ---------------------------------------------------------------
+ * - Fetch integration status from backend
+ * - Update Profile popup UI (anchors: #google-ads-link, #meta-ads-link)
+ * - Listen for OAuth completion from popup window
+ ******************************************************************/
+
+// Backend base URL (Cloud Run)
+const ADS_CONNECTOR_BASE_URL = "https://scalex-ads-connector-ohkoqzgrzq-el.a.run.app";
+
+// Security: only accept postMessage from this origin
+const ADS_CONNECTOR_ORIGIN = new URL(ADS_CONNECTOR_BASE_URL).origin;
+
+function showGlobalLoader() {
+    const loaderEl = document.getElementById("loader");
+    if (loaderEl) loaderEl.classList.remove("hidden");
+}
+
+function hideGlobalLoader() {
+    const loaderEl = document.getElementById("loader");
+    if (loaderEl) loaderEl.classList.add("hidden");
+}
+
+/**
+ * Get the active client_id.
+ * Priority:
+ * 1) Modal field (#client-modal-client-id) if present (popup open)
+ * 2) Header field (#client-id-display)
+ */
+function getActiveClientId() {
+    const modalClientEl = document.getElementById("client-modal-client-id");
+    const headerClientEl = document.getElementById("client-id-display");
+
+    const modalClientId = (modalClientEl?.textContent || "").trim();
+    if (modalClientId && modalClientId !== "--") return modalClientId;
+
+    const headerClientId = (headerClientEl?.textContent || "").trim();
+    return headerClientId || "";
+}
+
+/**
+ * Update a single platform anchor based on connection status.
+ * This is designed for <a> tags (not <button>).
+ */
+function applyPlatformUI(anchorEl, platformKey, statusObj) {
+    if (!anchorEl) return;
+
+    // Reset
+    anchorEl.classList.remove("connected", "reconnect");
+    anchorEl.removeAttribute("aria-disabled");
+
+    const connected = Boolean(statusObj?.connected);
+    const state = (statusObj?.status || "").toLowerCase(); // active / disconnected / etc.
+
+    // Default label (connect)
+    const label = platformKey === "google_ads" ? "Google Ads" : "Meta Ads";
+
+    if (!connected) {
+        anchorEl.textContent = `Connect ${label}`;
+        // Anchor remains clickable (href is already set by openClientModal)
+        return;
+    }
+
+    if (state === "active") {
+        anchorEl.textContent = `${label} Connected ✅`;
+        anchorEl.classList.add("connected");
+        anchorEl.setAttribute("aria-disabled", "true");
+        // CSS handles pointer-events: none for .connected (already in styles.css)
+        return;
+    }
+
+    // Anything not active but connected -> reconnect state
+    anchorEl.textContent = `Reconnect ${label} ⚠️`;
+    anchorEl.classList.add("reconnect");
+    // Keep clickable so user can re-run OAuth
+}
+
+/**
+ * Update the popup UI based on backend response.
+ * Expected structure:
+ * {
+ *   google_ads: { connected: bool, status: "active"|"disconnected"|... },
+ *   meta_ads:   { connected: bool, status: "active"|"disconnected"|... }
+ * }
+ */
+function updateIntegrationUI(payload) {
+    // The two anchors in YOUR HTML
+    const googleLink = document.getElementById("google-ads-link");
+    const metaLink = document.getElementById("meta-ads-link");
+
+    applyPlatformUI(googleLink, "google_ads", payload?.google_ads);
+    applyPlatformUI(metaLink, "meta_ads", payload?.meta_ads);
+}
+
+/**
+ * Fetch integration status from backend and apply to UI.
+ * This can be called:
+ * - When modal opens (you already call loadIntegrationStatus() there)
+ * - When OAuth popup reports completion (postMessage)
+ */
+async function loadIntegrationStatus() {
+    try {
+        const clientId = getActiveClientId();
+        if (!clientId) {
+            console.warn("Phase2: client_id missing; cannot fetch integration status.");
+            return;
+        }
+
+        const url = `${ADS_CONNECTOR_BASE_URL}/api/v1/integrations/status?client_id=${encodeURIComponent(clientId)}`;
+        const res = await fetch(url);
+
+        if (!res.ok) {
+            console.warn("Phase2: failed to load integrations status:", res.status);
+            return;
+        }
+
+        const data = await res.json();
+        updateIntegrationUI(data);
+    } catch (err) {
+        console.error("Phase2: integration status error:", err);
+    }
+}
+
+// Expose for openClientModal() call (since it’s inside an IIFE above)
+window.loadIntegrationStatus = loadIntegrationStatus;
+
+/**
+ * Listen for OAuth completion messages from popup windows.
+ * NOTE: This assumes your OAuth success page does:
+ * window.opener.postMessage({ type: "SCALEX_OAUTH_DONE", ... }, "<dashboard-origin>");
+ */
+window.addEventListener("message", function (event) {
+    // Security: accept only from Ads Connector origin
+    if (event.origin !== ADS_CONNECTOR_ORIGIN) return;
+
+    const msg = event.data;
+    if (!msg || msg.type !== "SCALEX_OAUTH_DONE") return;
+
+    // Refresh status immediately (modal can remain open)
+    loadIntegrationStatus();
+});
 
 
 
