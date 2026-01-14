@@ -51,7 +51,8 @@
  * Example: https://gcl-service.run.app/api/v1/chart/kpi_revenue
  */
 // const SCALEX_API_BASE = "http://localhost:8000/api/v1/chart";
-const SCALEX_API_BASE = "https://scalex-ads-connector-ohkoqzgrzq-el.a.run.app/api/v1/chart";
+// const SCALEX_API_BASE = "https://scalex-ads-connector-ohkoqzgrzq-el.a.run.app/api/v1/chart";
+const SCALEX_API_BASE = "https://scalex-adapter-268453003438.europe-west1.run.app/chart-data";
 
 /**
  * 1.2: Current active page (Performance Overview or Channel Analytics)
@@ -132,12 +133,13 @@ function getStoredFilters() {
  *
  * @returns {object} API payload ready for JSON.stringify()
  */
-function buildPayload() {
+function buildPayload(chartId) {
     // Retrieve all stored filter values
     const f = getStoredFilters();
 
     // Construct payload object matching API schema
     return {
+        chartName: chartId,
         dateRange: f.dateRange,
         comparison: f.comparison,
         filters: {
@@ -177,11 +179,12 @@ function buildPayload() {
  */
 async function fetchChartData(chartId) {
     // Build payload from current filter state
-    const payload = buildPayload();
+    const payload = buildPayload(chartId);
 
     try {
         // Make POST request to backend
-        const res = await fetch(`${SCALEX_API_BASE}/${chartId}`, {
+        const url = SCALEX_API_BASE;
+        const res = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -614,12 +617,12 @@ function updateSmartAlertCard(cardId, cardLabel, data) {
         // metrics / channels are extra, used later if needed
     } = data;
 
-    const labelEl     = card.querySelector('.alert-text-label');
-    const prefixEl    = card.querySelector('.alert-main-prefix');
+    const labelEl = card.querySelector('.alert-text-label');
+    const prefixEl = card.querySelector('.alert-main-prefix');
     const highlightEl = card.querySelector('.alert-main-highlight');
-    const suffixEl    = card.querySelector('.alert-main-suffix');
-    const subtextEl   = card.querySelector('.alert-text-sub');
-    const symbolEl    = card.querySelector('.alert-symbol');
+    const suffixEl = card.querySelector('.alert-main-suffix');
+    const subtextEl = card.querySelector('.alert-text-sub');
+    const symbolEl = card.querySelector('.alert-symbol');
 
     if (!labelEl || !prefixEl || !highlightEl || !suffixEl || !subtextEl || !symbolEl) {
         console.warn('[ScaleX] Smart alert DOM structure missing in card:', cardId);
@@ -630,10 +633,10 @@ function updateSmartAlertCard(cardId, cardLabel, data) {
     labelEl.textContent = cardLabel;
 
     // 2) Text content from API
-    prefixEl.textContent    = mainPrefix || '';
+    prefixEl.textContent = mainPrefix || '';
     highlightEl.textContent = mainHighlight || '';
-    suffixEl.textContent    = mainSuffix || '';
-    subtextEl.textContent   = subtext || '';
+    suffixEl.textContent = mainSuffix || '';
+    subtextEl.textContent = subtext || '';
 
     // 3) Severity-based styling
     const { highlightClass, symbolClass, fallbackIcon } = mapSeverityToClasses(severity);
@@ -734,8 +737,8 @@ function updatePerfFunnelFromAPI(apiData) {
     }
 
     // Build series for Meta / Google / LinkedIn
-    const meta     = splitChannel('meta');
-    const google   = splitChannel('google');
+    const meta = splitChannel('meta');
+    const google = splitChannel('google');
     const linkedin = splitChannel('linkedin');
 
     const dsets = chart.data.datasets;
@@ -897,14 +900,14 @@ function updateLtvCacRatioFromAPI(data) {
         // Update text
         badge.textContent =
             status === 'healthy' ? 'Healthy' :
-            status === 'warning' ? 'Watch' :
-            'At Risk';
+                status === 'warning' ? 'Watch' :
+                    'At Risk';
     }
 }
 
 // Update LTV by cohort chart (bar or line)
 function updateLtvByCohortFromAPI(apiData) {
-    const chart = window.scalexLtvByCohortChart; 
+    const chart = window.scalexLtvByCohortChart;
     if (!chart) return;
 
     const { labels, datasets } = apiData;
@@ -1139,7 +1142,7 @@ function updateChannelLeadQualityFromAPI(apiData) {
 }
 
 function updateChannelSpendEfficiencyFromAPI(apiData) {
-    const chart = window.scalexSpendEfficiencyChart; 
+    const chart = window.scalexSpendEfficiencyChart;
     if (!chart) return;
 
     const { labels, datasets, index } = apiData;
@@ -1239,13 +1242,13 @@ function updateChannelSnapshotTableFromAPI(apiData) {
     };
 
     rows.forEach(row => {
-        const channel     = getCell(row, 'channel') ?? '';
-        const spend       = getCell(row, 'spend');
-        const revenue     = getCell(row, 'revenue');
-        const cpl         = getCell(row, 'cpl');
-        const cac         = getCell(row, 'cac');
-        const roas        = getCell(row, 'roas');
-        const roiPercent  = getCell(row, 'roiPercent');
+        const channel = getCell(row, 'channel') ?? '';
+        const spend = getCell(row, 'spend');
+        const revenue = getCell(row, 'revenue');
+        const cpl = getCell(row, 'cpl');
+        const cac = getCell(row, 'cac');
+        const roas = getCell(row, 'roas');
+        const roiPercent = getCell(row, 'roiPercent');
         const leadQuality = getCell(row, 'leadQuality');
 
         const tr = document.createElement('tr');
@@ -1296,7 +1299,7 @@ window.renderChartFromAPI = function renderChartFromAPI(chartId, response) {
     // ======================================================================
     // DETAIL CHARTS (Performance Overview)
     // ======================================================================
-    
+
     switch (chartId) {
 
         // 🔹 Performance Overview – KPI's
@@ -1309,10 +1312,10 @@ window.renderChartFromAPI = function renderChartFromAPI(chartId, response) {
         case 'kpi_roas':
             updateKpiCards(data, 'roas-current', 'roas-prev', 'roas-change', 'roas-chart', 'roas');
             break;
-            case 'kpi_roi':
-                updateKpiCards(data, 'roi-current', 'roi-prev', 'roi-change', 'roi-chart', 'roi');
-                break;
-        
+        case 'kpi_roi':
+            updateKpiCards(data, 'roi-current', 'roi-prev', 'roi-change', 'roi-chart', 'roi');
+            break;
+
         // 🔹 Performance Overview – SMART ALERTS
         case 'alert_performance_gain':
             updateSmartAlertCard(
@@ -1337,7 +1340,7 @@ window.renderChartFromAPI = function renderChartFromAPI(chartId, response) {
                 data
             );
             break;
-                
+
         // 🔹 Performance Overview – charts
         case 'perf_funnel_by_channel':
             updatePerfFunnelFromAPI(data);
